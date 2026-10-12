@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Ingredient {
+  id              String       @id @default(cuid())
+  name            String
+  category        String       @default("BAHAN_BAKU") // BAHAN_BAKU, BUMBU, PACKAGING, OPERASIONAL
+  purchasePrice   Float        // e.g. 45000 (IDR)
+  purchaseQty     Float        // e.g. 1
+  purchaseUnit    String       // KG, GRAM, LITER, ML, PCS, BUTIR, LEMBAR, PACK
+  yieldPercent    Float        @default(100.0) // 100% means no shrinkage/waste. E.g. 85% means 15% wasted
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  recipeItems     RecipeItem[]
+
+  @@index([category])
+}
+
+model MenuItem {
+  id                    String       @id @default(cuid())
+  name                  String
+  category              String       @default("Makanan") // Makanan, Minuman, Snack, Paket
+  description           String?
+  targetMarginDineIn    Float        @default(65.0) // 65% target gross margin
+  overheadPercent       Float        @default(5.0)  // 5% overhead buffer (gas/listrik/seasoning)
+  packagingOfflineCost  Float        @default(500.0)// Biaya kemasan makan di tempat / bawa pulang biasa
+  packagingOnlineCost   Float        @default(2500.0)// Biaya kemasan ojol (paper bowl + seal + sendok + kantong)
+  manualOfflinePrice    Float?       // Jika user ingin menetapkan harga offline sendiri
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  recipeItems           RecipeItem[]
+
+  @@index([category])
+}
+
+model RecipeItem {
+  id            String     @id @default(cuid())
+  menuItemId    String
+  ingredientId  String
+  usageQty      Float      // e.g. 150
+  usageUnit     String     // e.g. GRAM
+  notes         String?
+  menuItem      MenuItem   @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  ingredient    Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+
+  @@index([menuItemId])
+  @@index([ingredientId])
+}
