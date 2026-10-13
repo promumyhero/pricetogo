@@ -556,7 +556,7 @@ export function OnlineReversePricingCard({
           <p className="text-[10px] sm:text-[11px] leading-relaxed">
             Membagi target uang bersih terhadap sisa persentase komisi dan promo agar margin tidak tergerus:
           </p>
-          <div className="font-mono bg-white dark:bg-zinc-900 p-2 rounded text-[10px] sm:text-[11px] text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 text-center break-words">
+          <div className="font-mono bg-white dark:bg-zinc-900 p-2 rounded text-[10px] sm:text-[11px] text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 text-center wrap-break-word">
             Harga = (Target Payout + Biaya) / (1 - (Komisi% + Promo%))
           </div>
         </div>

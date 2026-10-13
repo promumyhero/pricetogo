@@ -43,7 +43,6 @@ export async function GET() {
     return NextResponse.json({
       data: INITIAL_MENUS,
       source: "fallback",
-      error: String(error),
     });
   }
 }
@@ -51,21 +50,44 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const trimmedName = String(body.name || "").trim();
+
+    if (!trimmedName) {
+      return NextResponse.json(
+        { error: "Nama menu tidak boleh kosong" },
+        { status: 400 }
+      );
+    }
+
     if (!process.env.DATABASE_URL) {
       return NextResponse.json({
-        data: body,
+        data: { ...body, name: trimmedName },
         source: "mock-saved",
         message: "Tersimpan di local state",
       });
+    }
+
+    // Duplicate check: case-insensitive
+    const existing = await prisma.menuItem.findFirst({
+      where: {
+        name: { equals: trimmedName, mode: "insensitive" },
+      },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        { error: `Menu "${trimmedName}" sudah terdaftar.` },
+        { status: 409 }
+      );
     }
 
     // Transaction to safely create menu and its recipe items in 1 roundtrip
     const result = await prisma.$transaction(async (tx) => {
       const menu = await tx.menuItem.create({
         data: {
-          name: body.name,
+          name: trimmedName,
           category: body.category || "Makanan",
-          description: body.description,
+          description: body.description ? String(body.description).trim() : null,
           targetMarginDineIn: Number(body.targetMarginDineIn) || 65,
           overheadPercent: Number(body.overheadPercent) || 5,
           packagingOfflineCost: Number(body.packagingOfflineCost) || 500,
@@ -97,7 +119,7 @@ export async function POST(request: Request) {
       });
     });
 
-    return NextResponse.json({ data: result, success: true });
+    return NextResponse.json({ data: result, success: true }, { status: 201 });
   } catch (error) {
     console.error("Failed to save menu:", error);
     return NextResponse.json(

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { IngredientInput, SUPPORTED_UNITS } from "@/lib/calculator";
 import { formatIDR } from "@/lib/utils";
+import { useToast } from "./ToastProvider";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
-import { Plus, Trash2, Search } from "lucide-react";
+import { Plus, Trash2, Search, AlertTriangle, Sparkles, ChevronDown } from "lucide-react";
 
 interface IngredientsModalProps {
   isOpen: boolean;
@@ -29,8 +30,10 @@ export function IngredientsModal({
   onAddIngredient,
   onDeleteIngredient,
 }: IngredientsModalProps) {
+  const { warning: toastWarning, success: toastSuccess, error: toastError } = useToast();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [displayLimit, setDisplayLimit] = useState(15);
 
   // Form State
   const [name, setName] = useState("");
@@ -40,9 +43,60 @@ export function IngredientsModal({
   const [purchaseUnit, setPurchaseUnit] = useState("KG");
   const [yieldPercent, setYieldPercent] = useState("100");
 
+  // Track duplicate to avoid repeating toast spam
+  const lastDuplicateToastRef = useRef<string>("");
+
+  // Duplicate Check (Case-insensitive & trimmed)
+  const normalizedName = name.trim().toLowerCase();
+  const exactDuplicate = useMemo(() => {
+    if (!normalizedName) return null;
+    return ingredients.find(
+      (ing) => ing.name.trim().toLowerCase() === normalizedName
+    );
+  }, [normalizedName, ingredients]);
+
+  // Trigger Toast Notification on duplicate detection
+  useEffect(() => {
+    if (exactDuplicate && exactDuplicate.name !== lastDuplicateToastRef.current) {
+      lastDuplicateToastRef.current = exactDuplicate.name;
+      toastWarning(
+        "Bahan Sudah Terdaftar di Database",
+        `"${exactDuplicate.name}" sudah ada di master data (${formatIDR(exactDuplicate.purchasePrice)}/${exactDuplicate.purchaseQty} ${exactDuplicate.purchaseUnit}). Data tidak dapat diduplikasi.`
+      );
+    } else if (!exactDuplicate) {
+      lastDuplicateToastRef.current = "";
+    }
+  }, [exactDuplicate, toastWarning]);
+
+  // Autocomplete / Autofill suggestions from existing ingredients
+  const nameSuggestions = useMemo(() => {
+    if (!name.trim() || exactDuplicate) return [];
+    const query = name.trim().toLowerCase();
+    return ingredients
+      .filter((ing) => ing.name.toLowerCase().includes(query))
+      .slice(0, 4);
+  }, [name, exactDuplicate, ingredients]);
+
+  const handleApplySuggestion = (sug: IngredientInput) => {
+    setName(sug.name);
+    setCategory(sug.category);
+    setPurchasePrice(sug.purchasePrice.toString());
+    setPurchaseQty(sug.purchaseQty.toString());
+    setPurchaseUnit(sug.purchaseUnit);
+    setYieldPercent(sug.yieldPercent.toString());
+  };
+
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
+
+    if (exactDuplicate) {
+      toastError(
+        "Pencegahan Duplikat Aktif",
+        `Bahan "${name.trim()}" sudah ada di database. Silakan gunakan nama lain.`
+      );
+      return;
+    }
 
     const newIng: IngredientInput = {
       id: "ing-" + Date.now(),
@@ -55,17 +109,33 @@ export function IngredientsModal({
     };
 
     onAddIngredient(newIng);
+    toastSuccess(
+      "Bahan Berhasil Disimpan",
+      `"${newIng.name}" telah ditambahkan ke Master Data.`
+    );
+
     setName("");
     setPurchasePrice("50000");
     setPurchaseQty("1");
     setYieldPercent("100");
   };
 
-  const filtered = ingredients.filter((ing) => {
-    const matchSearch = ing.name.toLowerCase().includes(search.toLowerCase());
-    const matchCat = categoryFilter === "ALL" || ing.category === categoryFilter;
-    return matchSearch && matchCat;
-  });
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return ingredients.filter((ing) => {
+      const matchSearch = !q || ing.name.toLowerCase().includes(q);
+      const matchCat = categoryFilter === "ALL" || ing.category === categoryFilter;
+      return matchSearch && matchCat;
+    });
+  }, [ingredients, search, categoryFilter]);
+
+  // Reset lazy table display limit on search or filter change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDisplayLimit(15);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [search, categoryFilter]);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -79,7 +149,7 @@ export function IngredientsModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Form Tambah Bahan Baru (Responsive paired grid) */}
+        {/* Form Tambah Bahan Baru (Responsive paired grid with Duplicate Protection) */}
         <form
           onSubmit={handleCreate}
           className="bg-zinc-50 dark:bg-zinc-950/70 p-3 sm:p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 space-y-3"
@@ -90,7 +160,7 @@ export function IngredientsModal({
               <span>Input Bahan Baku Baru</span>
             </span>
             <span className="text-[10px] text-zinc-400 hidden sm:inline">
-              *Otomatis terhubung ke konversi resep
+              *Pencegahan duplikat aktif & autofill cerdas
             </span>
           </div>
 
@@ -103,7 +173,11 @@ export function IngredientsModal({
                 placeholder="Contoh: Daging Ayam Fillet, Beras, dll."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700"
+                className={`h-8 text-xs bg-white dark:bg-zinc-900 ${
+                  exactDuplicate
+                    ? "border-rose-500 focus-visible:ring-rose-500/30 text-rose-900 dark:text-rose-100"
+                    : "border-zinc-200 dark:border-zinc-700"
+                }`}
                 required
               />
             </div>
@@ -199,10 +273,79 @@ export function IngredientsModal({
               <Button
                 type="submit"
                 size="sm"
-                className="w-full h-8 text-xs"
+                disabled={Boolean(exactDuplicate) || !name.trim()}
+                className={`w-full h-8 text-xs transition-colors ${
+                  exactDuplicate ? "opacity-50 cursor-not-allowed bg-zinc-300 dark:bg-zinc-800 text-zinc-500" : ""
+                }`}
               >
                 + Simpan
               </Button>
+            </div>
+
+            {/* DUPLICATE WARNING ALERT with Butter-Smooth Grid Accordion */}
+            <div
+              className={`col-span-12 grid transition-all duration-300 ease-out ${
+                exactDuplicate
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0 pointer-events-none"
+              }`}
+            >
+              <div className="overflow-hidden">
+                {exactDuplicate && (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs animate-smooth-reveal">
+                    <div className="flex items-center space-x-2 text-rose-700 dark:text-rose-300">
+                      <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>
+                        Bahan <strong>&ldquo;{exactDuplicate.name}&rdquo;</strong> sudah terdaftar di Master Data ({formatIDR(exactDuplicate.purchasePrice)}/{exactDuplicate.purchaseQty} {exactDuplicate.purchaseUnit}).
+                        Data duplikat tidak diperbolehkan.
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSearch(exactDuplicate.name)}
+                      className="text-[11px] font-medium text-rose-800 dark:text-rose-200 underline hover:text-rose-900 dark:hover:text-white cursor-pointer self-start sm:self-auto shrink-0"
+                    >
+                      Lihat di Tabel
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* AUTOCOMPLETE / AUTOFILL SUGGESTIONS with Butter-Smooth Grid Accordion */}
+            <div
+              className={`col-span-12 grid transition-all duration-300 ease-out ${
+                !exactDuplicate && nameSuggestions.length > 0
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0 pointer-events-none"
+              }`}
+            >
+              <div className="overflow-hidden">
+                {!exactDuplicate && nameSuggestions.length > 0 && (
+                  <div className="p-2 rounded-lg bg-zinc-100/80 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1.5 animate-smooth-reveal">
+                    <div className="flex items-center space-x-1.5 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
+                      <Sparkles className="h-3 w-3 text-amber-500" />
+                      <span>Bahan mirip ditemukan di master data (klik untuk autofill data):</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {nameSuggestions.map((sug) => (
+                        <button
+                          key={sug.id}
+                          type="button"
+                          onClick={() => handleApplySuggestion(sug)}
+                          className="px-2 py-1 rounded-md bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 text-xs text-zinc-800 dark:text-zinc-200 cursor-pointer flex items-center space-x-1.5 transition-all shadow-2xs"
+                          title="Klik untuk menerapkan data bahan ini"
+                        >
+                          <span className="font-medium">{sug.name}</span>
+                          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono">
+                            {formatIDR(sug.purchasePrice)}/{sug.purchaseUnit}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </form>
@@ -237,7 +380,7 @@ export function IngredientsModal({
           </div>
         </div>
 
-        {/* Ingredients Table */}
+        {/* Ingredients Table with Lazy Loading */}
         <div className="overflow-x-auto rounded-xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-950/40">
           <table className="w-full text-xs text-left">
             <thead className="bg-zinc-50 dark:bg-zinc-950 text-zinc-500 dark:text-zinc-400 uppercase text-[10px] tracking-wider border-b border-zinc-200 dark:border-zinc-800">
@@ -251,7 +394,7 @@ export function IngredientsModal({
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60 font-sans">
-              {filtered.map((ing) => (
+              {filtered.slice(0, displayLimit).map((ing) => (
                 <tr key={ing.id} className="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/30">
                   <td className="py-2 px-3.5 font-medium text-zinc-900 dark:text-zinc-200">
                     {ing.name}
@@ -292,6 +435,20 @@ export function IngredientsModal({
               ))}
             </tbody>
           </table>
+
+          {/* Lazy Load More Bar if items exceed display limit */}
+          {filtered.length > displayLimit && (
+            <div className="p-2.5 text-center border-t border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/60 dark:bg-zinc-900/40">
+              <button
+                type="button"
+                onClick={() => setDisplayLimit((prev) => prev + 20)}
+                className="inline-flex items-center space-x-1 text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white px-3 py-1 rounded-md hover:bg-zinc-200/60 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <span>Tampilkan Lebih Banyak ({filtered.length - displayLimit} bahan lagi)</span>
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

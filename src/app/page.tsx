@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import {
   IngredientInput,
   MenuItemInput,
@@ -11,15 +12,12 @@ import {
 } from "@/lib/calculator";
 import { INITIAL_INGREDIENTS, INITIAL_MENUS } from "@/lib/storage";
 import { formatIDR } from "@/lib/utils";
+import { useToast } from "@/components/ToastProvider";
 import { Header } from "@/components/Header";
 import { MenuSelector } from "@/components/MenuSelector";
 import { RecipeCostingTable } from "@/components/RecipeCostingTable";
 import { DineInPricingCard } from "@/components/DineInPricingCard";
 import { OnlineReversePricingCard } from "@/components/OnlineReversePricingCard";
-import { IngredientsModal } from "@/components/IngredientsModal";
-import { MenuModal } from "@/components/MenuModal";
-import { PromoSimulatorSandbox } from "@/components/PromoSimulatorSandbox";
-import { FormulaGuideView } from "@/components/FormulaGuideView";
 import { Button } from "@/components/ui/button";
 import {
   Download,
@@ -31,7 +29,42 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+// LAZY LOADING: On-demand dynamic imports for modals and heavy simulator views
+const IngredientsModal = dynamic(
+  () => import("@/components/IngredientsModal").then((mod) => mod.IngredientsModal),
+  { ssr: false }
+);
+
+const MenuModal = dynamic(
+  () => import("@/components/MenuModal").then((mod) => mod.MenuModal),
+  { ssr: false }
+);
+
+const PromoSimulatorSandbox = dynamic(
+  () => import("@/components/PromoSimulatorSandbox").then((mod) => mod.PromoSimulatorSandbox),
+  {
+    loading: () => (
+      <div className="p-8 text-center text-xs text-zinc-500 animate-pulse">
+        Memuat Simulator Promo Ojol...
+      </div>
+    ),
+  }
+);
+
+const FormulaGuideView = dynamic(
+  () => import("@/components/FormulaGuideView").then((mod) => mod.FormulaGuideView),
+  {
+    loading: () => (
+      <div className="p-8 text-center text-xs text-zinc-500 animate-pulse">
+        Memuat Panduan Formula...
+      </div>
+    ),
+  }
+);
+
 export default function Home() {
+  const toast = useToast();
+
   // State
   const [ingredients, setIngredients] = useState<IngredientInput[]>(INITIAL_INGREDIENTS);
   const [menus, setMenus] = useState<MenuItemInput[]>(INITIAL_MENUS);
@@ -131,8 +164,12 @@ export default function Home() {
 
   const handleDeleteMenu = (id: string) => {
     setMenus((prev) => {
+      const target = prev.find((m) => m.id === id);
       const next = prev.filter((m) => m.id !== id);
       if (next.length > 0) setSelectedMenuId(next[0].id);
+      if (target) {
+        toast.info("Menu Dihapus", `Menu "${target.name}" telah dihapus.`);
+      }
       return next;
     });
   };
@@ -143,7 +180,13 @@ export default function Home() {
   };
 
   const handleDeleteIngredient = (id: string) => {
-    setIngredients((prev) => prev.filter((i) => i.id !== id));
+    setIngredients((prev) => {
+      const target = prev.find((i) => i.id === id);
+      if (target) {
+        toast.info("Bahan Dihapus", `Bahan "${target.name}" telah dihapus dari Master Data.`);
+      }
+      return prev.filter((i) => i.id !== id);
+    });
   };
 
   // Reset Data to Defaults
@@ -154,6 +197,10 @@ export default function Home() {
       setSelectedMenuId(INITIAL_MENUS[0].id);
       localStorage.removeItem("pricetogo_ingredients");
       localStorage.removeItem("pricetogo_menus");
+      toast.info(
+        "Data Template Direset",
+        "Seluruh bahan baku dan menu telah dikembalikan ke template awal."
+      );
     }
   };
 
@@ -169,6 +216,7 @@ export default function Home() {
     a.download = `pricetogo-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    toast.success("Cadangan Diunduh", "File backup data JSON berhasil diunduh.");
   };
 
   // Import JSON
@@ -183,12 +231,18 @@ export default function Home() {
           setIngredients(parsed.ingredients);
           setMenus(parsed.menus);
           if (parsed.menus.length > 0) setSelectedMenuId(parsed.menus[0].id);
-          alert("Data berhasil diimpor!");
+          toast.success(
+            "Data Berhasil Dipulihkan",
+            "Seluruh data bahan baku dan resep berhasil dimuat dari file backup."
+          );
         } else {
-          alert("Format file JSON tidak valid.");
+          toast.error(
+            "Format File Tidak Valid",
+            "File JSON tidak memiliki struktur data bahan dan menu yang valid."
+          );
         }
       } catch {
-        alert("Gagal membaca file JSON.");
+        toast.error("Gagal Membaca File", "Terjadi kesalahan saat memproses file JSON.");
       }
     };
     reader.readAsText(file);
@@ -412,6 +466,7 @@ export default function Home() {
         }}
         initialMenu={editingMenu}
         onSaveMenu={handleSaveMenu}
+        existingMenus={menus}
       />
     </div>
   );

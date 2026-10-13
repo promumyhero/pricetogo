@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
   IngredientInput,
   MenuItemInput,
@@ -8,12 +8,24 @@ import {
   MenuCostingBreakdown,
 } from "@/lib/calculator";
 import { formatIDR } from "@/lib/utils";
+import { useToast } from "./ToastProvider";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
-import { Plus, Trash2, Package, Flame, ArrowRight } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Package,
+  Flame,
+  ArrowRight,
+  Search,
+  Check,
+  AlertTriangle,
+  Sparkles,
+  X,
+} from "lucide-react";
 
 interface RecipeCostingTableProps {
   menu: MenuItemInput;
@@ -32,17 +44,112 @@ export function RecipeCostingTable({
   onUpdateMenuParameters,
   onOpenIngredientsModal,
 }: RecipeCostingTableProps) {
+  const { warning: toastWarning, success: toastSuccess } = useToast();
+
   // New item draft state
   const [selectedIngredientId, setSelectedIngredientId] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [usageQty, setUsageQty] = useState<string>("100");
   const [usageUnit, setUsageUnit] = useState<string>("GRAM");
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const ingredientMap = new Map<string, IngredientInput>(
-    ingredients.map((i) => [i.id, i])
+  // Close search dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(e.target as Node)
+      ) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const ingredientMap = useMemo(
+    () => new Map<string, IngredientInput>(ingredients.map((i) => [i.id, i])),
+    [ingredients]
   );
 
+  // O(1) Set lookup to check duplicate ingredients in this recipe
+  const existingIngredientIds = useMemo(
+    () => new Set(menu.recipeItems.map((item) => item.ingredientId)),
+    [menu.recipeItems]
+  );
+
+  const selectedIngredient = selectedIngredientId
+    ? ingredientMap.get(selectedIngredientId)
+    : null;
+
+  const isDuplicateInRecipe = selectedIngredientId
+    ? existingIngredientIds.has(selectedIngredientId)
+    : false;
+
+  // Filter ingredients for autocomplete search
+  const filteredIngredients = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) {
+      // Prioritize ingredients not yet in recipe
+      return [...ingredients].sort((a, b) => {
+        const aIn = existingIngredientIds.has(a.id) ? 1 : 0;
+        const bIn = existingIngredientIds.has(b.id) ? 1 : 0;
+        return aIn - bIn;
+      });
+    }
+
+    return ingredients
+      .filter(
+        (ing) =>
+          ing.name.toLowerCase().includes(q) ||
+          ing.category.toLowerCase().includes(q)
+      )
+      .sort((a, b) => {
+        const aIn = existingIngredientIds.has(a.id) ? 1 : 0;
+        const bIn = existingIngredientIds.has(b.id) ? 1 : 0;
+        return aIn - bIn;
+      });
+  }, [ingredients, searchQuery, existingIngredientIds]);
+
+  // Autofill handler when selecting an ingredient
+  const handleSelectIngredient = (ing: IngredientInput) => {
+    setSelectedIngredientId(ing.id);
+    setSearchQuery(ing.name);
+    setIsSearchOpen(false);
+
+    // Notify user if item is already in recipe
+    if (existingIngredientIds.has(ing.id)) {
+      toastWarning(
+        "Bahan Sudah Ada di Resep",
+        `"${ing.name}" sudah ada di dalam resep ini. Data duplikat tidak dapat ditambahkan.`
+      );
+    }
+
+    // Intelligent metric unit & quantity autofill
+    if (ing.purchaseUnit === "KG") {
+      setUsageUnit("GRAM");
+      setUsageQty("100");
+    } else if (ing.purchaseUnit === "LITER") {
+      setUsageUnit("ML");
+      setUsageQty("100");
+    } else if (ing.purchaseUnit === "PCS") {
+      setUsageUnit("PCS");
+      setUsageQty("1");
+    } else if (ing.purchaseUnit === "BUTIR") {
+      setUsageUnit("BUTIR");
+      setUsageQty("1");
+    } else if (ing.purchaseUnit === "LEMBAR") {
+      setUsageUnit("LEMBAR");
+      setUsageQty("1");
+    } else {
+      setUsageUnit(ing.purchaseUnit);
+      setUsageQty("1");
+    }
+  };
+
   const handleAddIngredient = () => {
-    if (!selectedIngredientId) return;
+    if (!selectedIngredientId || isDuplicateInRecipe) return;
     const ing = ingredientMap.get(selectedIngredientId);
     if (!ing) return;
 
@@ -54,8 +161,15 @@ export function RecipeCostingTable({
     };
 
     onUpdateRecipeItems([...menu.recipeItems, newItem]);
+    toastSuccess(
+      "Bahan Ditambahkan",
+      `"${ing.name}" (${newItem.usageQty} ${newItem.usageUnit}) berhasil dimasukkan ke resep.`
+    );
+
     setSelectedIngredientId("");
+    setSearchQuery("");
     setUsageQty("100");
+    setUsageUnit("GRAM");
   };
 
   const handleRemoveItem = (itemId: string) => {
@@ -100,40 +214,146 @@ export function RecipeCostingTable({
       </CardHeader>
 
       <CardContent className="p-3.5 sm:p-5 space-y-4 sm:space-y-5">
-        {/* Quick Add Form Bar (Optimized for Mobile 2-col & Desktop 12-col) */}
-        <div className="bg-zinc-50/90 dark:bg-zinc-950/70 p-3 sm:p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80">
-          <div className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2 sm:mb-2.5">
-            Tambah Komponen Bahan
+        {/* Quick Add Form Bar with Searchable Combobox & Autofill */}
+        <div className="bg-zinc-50/90 dark:bg-zinc-950/70 p-3 sm:p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
+              Tambah Komponen Bahan
+            </span>
+            <span className="text-[10px] text-zinc-400 hidden sm:inline">
+              *Ketik nama bahan untuk autofill takaran
+            </span>
           </div>
+
           <div className="grid grid-cols-12 gap-2 sm:gap-2.5 items-end">
-            {/* Bahan Dropdown */}
-            <div className="col-span-12 sm:col-span-5">
-              <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block mb-1">
-                Pilih Bahan Baku
-              </label>
-              <Select
-                value={selectedIngredientId}
-                onValueChange={(val) => {
-                  setSelectedIngredientId(val);
-                  const ing = ingredientMap.get(val);
-                  if (ing) {
-                    if (ing.purchaseUnit === "KG") setUsageUnit("GRAM");
-                    else if (ing.purchaseUnit === "LITER") setUsageUnit("ML");
-                    else setUsageUnit(ing.purchaseUnit);
-                  }
-                }}
-              >
-                <SelectTrigger className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
-                  <SelectValue placeholder="Pilih dari master bahan..." />
-                </SelectTrigger>
-                <SelectContent className="max-h-60 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
-                  {ingredients.map((ing) => (
-                    <SelectItem key={ing.id} value={ing.id} className="text-xs">
-                      {ing.name} ({formatIDR(ing.purchasePrice)} / {ing.purchaseQty} {ing.purchaseUnit})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Searchable Autocomplete Combobox */}
+            <div className="col-span-12 sm:col-span-5 relative" ref={searchContainerRef}>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block">
+                  Cari & Pilih Bahan Baku
+                </label>
+                {selectedIngredient && !isDuplicateInRecipe && (
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center">
+                    <Check className="h-2.5 w-2.5 mr-0.5" /> Terpilih
+                  </span>
+                )}
+              </div>
+
+              <div className="relative">
+                <Search className="h-3.5 w-3.5 absolute left-2.5 top-2.5 text-zinc-400 pointer-events-none" />
+                <Input
+                  type="text"
+                  placeholder="Ketik untuk cari bahan..."
+                  value={searchQuery}
+                  onFocus={() => setIsSearchOpen(true)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSearchQuery(val);
+                    setIsSearchOpen(true);
+
+                    // Check exact match to auto-select
+                    const exact = ingredients.find(
+                      (i) => i.name.toLowerCase() === val.trim().toLowerCase()
+                    );
+                    if (exact) {
+                      handleSelectIngredient(exact);
+                    } else if (selectedIngredientId && val !== selectedIngredient?.name) {
+                      setSelectedIngredientId("");
+                    }
+                  }}
+                  className={`h-8 text-xs pl-8 pr-7 bg-white dark:bg-zinc-900 transition-colors ${
+                    isDuplicateInRecipe
+                      ? "border-rose-500 text-rose-900 dark:text-rose-100 focus-visible:ring-rose-500/20"
+                      : selectedIngredientId
+                      ? "border-emerald-500/80 dark:border-emerald-600 text-zinc-900 dark:text-zinc-100"
+                      : "border-zinc-200 dark:border-zinc-700"
+                  }`}
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedIngredientId("");
+                      setIsSearchOpen(true);
+                    }}
+                    className="absolute right-2 top-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
+                    title="Hapus pencarian"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Autocomplete Dropdown Popover */}
+              {isSearchOpen && (
+                <div className="absolute z-30 left-0 right-0 top-full mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-xl text-xs divide-y divide-zinc-100 dark:divide-zinc-800 animate-smooth-reveal">
+                  {filteredIngredients.length === 0 ? (
+                    <div className="p-3 text-center text-zinc-400 text-[11px]">
+                      Bahan &ldquo;{searchQuery}&rdquo; tidak ditemukan.
+                      {onOpenIngredientsModal && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsSearchOpen(false);
+                            onOpenIngredientsModal();
+                          }}
+                          className="block mx-auto mt-1 text-emerald-600 dark:text-emerald-400 font-medium underline cursor-pointer"
+                        >
+                          + Daftarkan di Master Bahan
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    filteredIngredients.map((ing) => {
+                      const inRecipe = existingIngredientIds.has(ing.id);
+                      const isSelected = ing.id === selectedIngredientId;
+
+                      return (
+                        <button
+                          key={ing.id}
+                          type="button"
+                          onClick={() => handleSelectIngredient(ing)}
+                          className={`w-full p-2.5 text-left flex items-center justify-between transition-colors cursor-pointer ${
+                            isSelected
+                              ? "bg-zinc-100 dark:bg-zinc-800"
+                              : inRecipe
+                              ? "bg-rose-50/50 dark:bg-rose-950/20 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                              : "hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
+                          }`}
+                        >
+                          <div className="min-w-0 pr-2">
+                            <div className="flex items-center space-x-1.5">
+                              <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                                {ing.name}
+                              </span>
+                              {inRecipe && (
+                                <span className="text-[9px] px-1 py-0.2 rounded font-medium bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900 shrink-0">
+                                  Sudah di Resep
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-zinc-500 dark:text-zinc-400 flex items-center space-x-1.5 mt-0.5">
+                              <span>{ing.category}</span>
+                              <span>•</span>
+                              <span>Yield {ing.yieldPercent}%</span>
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <span className="font-mono text-zinc-800 dark:text-zinc-200 font-medium text-xs block tabular-nums">
+                              {formatIDR(ing.purchasePrice)}
+                            </span>
+                            <span className="text-[10px] text-zinc-400 font-mono">
+                              /{ing.purchaseQty} {ing.purchaseUnit}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Takaran Input (Side-by-side with Satuan on Mobile) */}
@@ -178,12 +398,62 @@ export function RecipeCostingTable({
                 type="button"
                 size="sm"
                 onClick={handleAddIngredient}
-                disabled={!selectedIngredientId}
-                className="w-full h-8 text-xs"
+                disabled={!selectedIngredientId || isDuplicateInRecipe}
+                className={`w-full h-8 text-xs transition-colors ${
+                  isDuplicateInRecipe
+                    ? "opacity-50 cursor-not-allowed bg-zinc-300 dark:bg-zinc-800 text-zinc-500"
+                    : ""
+                }`}
               >
                 <Plus className="h-3.5 w-3.5 mr-1" />
                 Tambah
               </Button>
+            </div>
+
+            {/* DUPLICATE WARNING IN RECIPE with Butter-Smooth Grid Accordion */}
+            <div
+              className={`col-span-12 grid transition-all duration-300 ease-out ${
+                isDuplicateInRecipe && selectedIngredient
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0 pointer-events-none"
+              }`}
+            >
+              <div className="overflow-hidden">
+                {isDuplicateInRecipe && selectedIngredient && (
+                  <div className="flex items-center space-x-2 p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 animate-smooth-reveal">
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                    <span>
+                      Bahan <strong>&ldquo;{selectedIngredient.name}&rdquo;</strong> sudah ada di dalam resep ini.
+                      Data ganda tidak diperbolehkan. Silakan sesuaikan takaran porsi langsung pada baris tabel di bawah.
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* AUTOFILL HELPER BANNER with Butter-Smooth Grid Accordion */}
+            <div
+              className={`col-span-12 grid transition-all duration-300 ease-out ${
+                selectedIngredient && !isDuplicateInRecipe
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0 pointer-events-none"
+              }`}
+            >
+              <div className="overflow-hidden">
+                {selectedIngredient && !isDuplicateInRecipe && (
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-zinc-100/70 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-600 dark:text-zinc-400 animate-smooth-reveal">
+                    <div className="flex items-center space-x-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                      <span>
+                        Autofill aktif: <strong>{selectedIngredient.name}</strong> ({formatIDR(selectedIngredient.purchasePrice)}/{selectedIngredient.purchaseQty} {selectedIngredient.purchaseUnit}, Yield {selectedIngredient.yieldPercent}%)
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono text-zinc-400">
+                      Satuan porsi disesuaikan ke {usageUnit}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

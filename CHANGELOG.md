@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-10-13
+
+### Added
+- **Butter-Smooth Micro-Animations (Zero Jerky Layout Shifts)**:
+  - Menggantikan kemunculan DOM yang kasar/mendadak dengan teknik **CSS Grid Accordion Transition** (`grid-rows-[0fr]` ke `grid-rows-[1fr]` berdurasi 300ms `ease-out`). Input di bawahnya kini bergeser turun dan naik secara halus alami tanpa sentakan (*layout shift*).
+  - Menambahkan keyframes micro-animation berskala halus `animate-smooth-reveal` dan `animate-toast-enter` dengan kurva pegas organik (`cubic-bezier(0.16, 1, 0.3, 1)`).
+  - Animasi halus diterapkan pada peringatan duplikat bahan, chip saran autofill, popover pencarian combobox, dan peringatan duplikat menu.
+- **Sistem Notifikasi Toast Global (`ToastProvider`)**:
+  - Dibuat sistem notifikasi toast mengambang terintegrasi di pojok layar dengan dukungan Dark/Light mode dan auto-dismiss.
+  - Notifikasi aktif instan saat terdeteksi bahan/menu ganda di database (`toast.warning`), saat operasi simpan berhasil (`toast.success`), saat impor/ekspor data (`toast.info`), dan saat percobaan duplikasi dicegah (`toast.error`).
+- **Lazy Loading & Performance Optimization**:
+  - Menerapkan `next/dynamic` pada komponen-komponen berat dan modal dialog (`IngredientsModal`, `MenuModal`, `PromoSimulatorSandbox`, `FormulaGuideView`) sehingga bundle JavaScript awal jauh lebih kecil dan halaman pertama terbuka instan.
+  - Menambahkan lazy rendering pada tabel Master Bahan (`displayLimit` batching) dengan tombol *"Tampilkan Lebih Banyak"* agar performa scrolling dan render di ponsel tetap ringan.
+
+## [1.3.0] - 2026-10-13
+
+### Added
+- **Pencegahan Duplikasi Data (Duplicate Prevention & Validation)**:
+  - **Master Bahan (`IngredientsModal`)**: Validasi real-time saat mengetik nama bahan (case-insensitive & trimmed). Jika nama sudah terdaftar, tombol simpan dinonaktifkan (`disabled`) dan muncul alert peringatan serta tombol jalan pintas untuk melihat bahan di tabel.
+  - **Komposisi Resep (`RecipeCostingTable`)**: Validasi $O(1)$ Set lookup untuk mendeteksi bahan yang sudah dimasukkan ke dalam resep menu. Tombol `+ Tambah` dinonaktifkan dengan peringatan visual jika bahan sudah ada di resep.
+  - **Master Menu (`MenuModal`)**: Validasi pencegahan nama menu ganda dengan peringatan instan dan pembatasan tombol simpan.
+  - **Server API Safeguard (`/api/ingredients` & `/api/menus`)**: Validasi server-side dengan status HTTP 409 Conflict jika nama data sudah terdaftar.
+- **Pencarian Autocomplete & Autofill Cerdas**:
+  - **Searchable Combobox di Resep BOM**: Menggantikan dropdown statis dengan kotak pencarian bahan interaktif dan panel popover saran.
+  - **Autofill Otomatis**: Saat memilih bahan dari hasil pencarian, sistem otomatis mengisi takaran porsi dan mengonversi satuan secara cerdas (misal: beli `KG` otomatis takaran porsi `GRAM` 100g; beli `LITER` otomatis `ML` 100ml; beli `PCS`/`BUTIR` otomatis `1 unit`).
+  - **Saran Bahan Mirip di Master Data**: Menampilkan tombol chip bahan yang mirip saat mengetik di form master bahan untuk autofill harga dan satuan.
+- **Keamanan Query & Perlindungan Kebocoran Data (Zero Leakage & Scalable)**:
+  - Sanitasi penanganan error di seluruh API endpoint (`/api/ingredients` dan `/api/menus`), mencegah kebocoran stack trace atau kredensial database internal ke client.
+  - Dukungan parameter query pencarian aman (`?q=...`) berbasis mode `insensitive` Prisma untuk skalabilitas volume data besar di masa depan.
+
 ## [1.2.0] - 2026-10-13
 
 ### Added

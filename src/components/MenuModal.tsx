@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { MenuItemInput } from "@/lib/calculator";
+import { useToast } from "./ToastProvider";
 import {
   Dialog,
   DialogContent,
@@ -11,12 +12,14 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { AlertTriangle } from "lucide-react";
 
 interface MenuModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMenu?: MenuItemInput | null;
   onSaveMenu: (menu: MenuItemInput) => void;
+  existingMenus?: MenuItemInput[];
 }
 
 export function MenuModal({
@@ -24,7 +27,9 @@ export function MenuModal({
   onClose,
   initialMenu,
   onSaveMenu,
+  existingMenus = [],
 }: MenuModalProps) {
+  const { warning: toastWarning, success: toastSuccess, error: toastError } = useToast();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("Makanan Utama");
   const [description, setDescription] = useState("");
@@ -32,6 +37,29 @@ export function MenuModal({
   const [overheadPercent, setOverheadPercent] = useState("5");
   const [packagingOfflineCost, setPackagingOfflineCost] = useState("500");
   const [packagingOnlineCost, setPackagingOnlineCost] = useState("2500");
+
+  const lastDuplicateToastRef = useRef<string>("");
+
+  const normalizedName = name.trim().toLowerCase();
+  const isDuplicateName = useMemo(() => {
+    if (!normalizedName || !existingMenus) return false;
+    return existingMenus.some(
+      (m) => m.id !== initialMenu?.id && m.name.trim().toLowerCase() === normalizedName
+    );
+  }, [normalizedName, existingMenus, initialMenu]);
+
+  // Toast notification when duplicate is detected
+  useEffect(() => {
+    if (isDuplicateName && normalizedName !== lastDuplicateToastRef.current) {
+      lastDuplicateToastRef.current = normalizedName;
+      toastWarning(
+        "Nama Menu Sudah Terdaftar",
+        `Menu "${name.trim()}" sudah ada. Gunakan nama yang berbeda agar tidak tertukar.`
+      );
+    } else if (!isDuplicateName) {
+      lastDuplicateToastRef.current = "";
+    }
+  }, [isDuplicateName, normalizedName, name, toastWarning]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -60,6 +88,14 @@ export function MenuModal({
     e.preventDefault();
     if (!name.trim()) return;
 
+    if (isDuplicateName) {
+      toastError(
+        "Pencegahan Duplikat",
+        `Nama menu "${name.trim()}" sudah ada. Silakan gunakan nama lain.`
+      );
+      return;
+    }
+
     const saved: MenuItemInput = {
       id: initialMenu ? initialMenu.id : "menu-" + Date.now(),
       name: name.trim(),
@@ -74,6 +110,10 @@ export function MenuModal({
     };
 
     onSaveMenu(saved);
+    toastSuccess(
+      "Menu Berhasil Disimpan",
+      `Menu "${saved.name}" berhasil disimpan.`
+    );
     onClose();
   };
 
@@ -99,9 +139,31 @@ export function MenuModal({
                 placeholder="Contoh: Paket Ayam Penyet Sambal Ijo"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-8 text-xs bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-700"
+                className={`h-8 text-xs bg-zinc-50 dark:bg-zinc-950 ${
+                  isDuplicateName
+                    ? "border-rose-500 text-rose-900 dark:text-rose-100 focus-visible:ring-rose-500/20"
+                    : "border-zinc-200 dark:border-zinc-700"
+                }`}
                 required
               />
+
+              {/* Butter-Smooth Grid Accordion for duplicate menu alert */}
+              <div
+                className={`grid transition-all duration-300 ease-out ${
+                  isDuplicateName
+                    ? "grid-rows-[1fr] opacity-100 mt-1.5"
+                    : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  {isDuplicateName && (
+                    <div className="flex items-center space-x-1.5 p-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 animate-smooth-reveal">
+                      <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
+                      <span>Nama menu &ldquo;{name.trim()}&rdquo; sudah ada. Gunakan nama yang berbeda agar tidak tertukar.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -217,7 +279,10 @@ export function MenuModal({
             <Button
               type="submit"
               size="sm"
-              className="text-xs"
+              disabled={isDuplicateName || !name.trim()}
+              className={`text-xs transition-colors ${
+                isDuplicateName ? "opacity-50 cursor-not-allowed bg-zinc-300 dark:bg-zinc-800 text-zinc-500" : ""
+              }`}
             >
               Simpan Menu
             </Button>
