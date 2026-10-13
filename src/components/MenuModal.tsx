@@ -79,12 +79,12 @@ export function MenuModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg bg-slate-900 border-slate-800 text-slate-100 p-6">
-        <DialogHeader className="border-b border-slate-800 pb-3">
-          <DialogTitle className="text-base font-semibold text-white">
-            {initialMenu ? "Ubah Data Menu" : "Tambah Menu Makanan / Minuman Baru"}
+      <DialogContent className="max-w-lg bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 p-6">
+        <DialogHeader className="border-b border-zinc-100 dark:border-zinc-800 pb-3">
+          <DialogTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+            {initialMenu ? "Ubah Data Menu" : "Tambah Menu Baru"}
           </DialogTitle>
-          <DialogDescription className="text-xs text-slate-400">
+          <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400">
             Atur parameter dasar menu, target margin keuntungan, dan alokasi kemasan.
           </DialogDescription>
         </DialogHeader>
@@ -92,28 +92,28 @@ export function MenuModal({
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-3">
             <div>
-              <label className="text-xs text-slate-300 font-medium block mb-1">
+              <label className="text-xs text-zinc-700 dark:text-zinc-300 font-medium block mb-1">
                 Nama Menu
               </label>
               <Input
                 placeholder="Contoh: Paket Ayam Penyet Sambal Ijo"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-8 text-xs bg-slate-950 border-slate-700"
+                className="h-8 text-xs bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-700"
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-300 font-medium block mb-1">
+                <label className="text-xs text-zinc-700 dark:text-zinc-300 font-medium block mb-1">
                   Kategori
                 </label>
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="h-8 text-xs bg-slate-950 border-slate-700">
+                  <SelectTrigger className="h-8 text-xs bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-700">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-700">
+                  <SelectContent className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
                     <SelectItem value="Makanan Utama">Makanan Utama</SelectItem>
                     <SelectItem value="Minuman">Minuman</SelectItem>
                     <SelectItem value="Snack / Cemilan">Snack / Cemilan</SelectItem>
@@ -123,14 +123,14 @@ export function MenuModal({
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 font-medium block mb-1">
+                <label className="text-xs text-zinc-700 dark:text-zinc-300 font-medium block mb-1">
                   Target Gross Margin (%)
                 </label>
                 <Input
                   type="number"
                   value={targetMarginDineIn}
                   onChange={(e) => setTargetMarginDineIn(e.target.value)}
-                  className="h-8 text-xs bg-slate-950 border-slate-700 font-mono"
+                  className="h-8 text-xs bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-700 font-mono"
                   min="20"
                   max="90"
                   required
@@ -139,66 +139,66 @@ export function MenuModal({
             </div>
 
             <div>
-              <label className="text-xs text-slate-300 font-medium block mb-1">
+              <label className="text-xs text-zinc-700 dark:text-zinc-300 font-medium block mb-1">
                 Deskripsi Singkat (Opsional)
               </label>
               <Input
                 placeholder="Keterangan porsi / keunggulan produk..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="h-8 text-xs bg-slate-950 border-slate-700"
+                className="h-8 text-xs bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-700"
               />
             </div>
 
             <div className="grid grid-cols-3 gap-2.5 pt-1">
               <div>
-                <label className="text-[10px] text-slate-400 block mb-1">
-                  Overhead Buffer (%)
+                <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
+                  Buffer Overhead (%)
                 </label>
                 <Input
                   type="number"
                   value={overheadPercent}
                   onChange={(e) => setOverheadPercent(e.target.value)}
-                  className="h-8 text-xs bg-slate-950 border-slate-700 font-mono"
+                  className="h-8 text-xs bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-700 font-mono"
                   min="0"
                   max="30"
                 />
-                <span className="text-[9px] text-slate-500 block mt-0.5">
+                <span className="text-[9px] text-zinc-400 block mt-0.5">
                   Minyak/gas/listrik
                 </span>
               </div>
 
               <div>
-                <label className="text-[10px] text-slate-400 block mb-1">
-                  Packaging Dine-In (Rp)
+                <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
+                  Kemasan Offline (Rp)
                 </label>
                 <Input
                   type="number"
                   value={packagingOfflineCost}
                   onChange={(e) => setPackagingOfflineCost(e.target.value)}
-                  className="h-8 text-xs bg-slate-950 border-slate-700 font-mono"
+                  className="h-8 text-xs bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-700 font-mono"
                   min="0"
                   step="100"
                 />
-                <span className="text-[9px] text-slate-500 block mt-0.5">
+                <span className="text-[9px] text-zinc-400 block mt-0.5">
                   Kertas alas/tisu
                 </span>
               </div>
 
               <div>
-                <label className="text-[10px] text-slate-400 block mb-1">
-                  Packaging Online (Rp)
+                <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
+                  Kemasan Ojol (Rp)
                 </label>
                 <Input
                   type="number"
                   value={packagingOnlineCost}
                   onChange={(e) => setPackagingOnlineCost(e.target.value)}
-                  className="h-8 text-xs bg-slate-950 border-slate-700 font-mono"
+                  className="h-8 text-xs bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-700 font-mono"
                   min="0"
                   step="100"
                 />
-                <span className="text-[9px] text-slate-500 block mt-0.5">
-                  Bowl + lid + sendok + tas
+                <span className="text-[9px] text-zinc-400 block mt-0.5">
+                  Bowl + sendok + kantong
                 </span>
               </div>
             </div>
@@ -217,7 +217,7 @@ export function MenuModal({
             <Button
               type="submit"
               size="sm"
-              className="text-xs bg-sky-500 hover:bg-sky-400 text-slate-950 font-medium"
+              className="text-xs"
             >
               Simpan Menu
             </Button>

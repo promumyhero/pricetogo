@@ -31,20 +31,22 @@ export function MenuSelector({
             <button
               key={menu.id}
               onClick={() => onSelectMenu(menu.id)}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all border cursor-pointer ${
+              className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors border cursor-pointer ${
                 isSelected
-                  ? "bg-slate-800 text-white border-sky-500/50 shadow-sm shadow-sky-500/10"
-                  : "bg-slate-900/60 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200"
+                  ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 shadow-xs"
+                  : "bg-white dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-200"
               }`}
             >
-              <Utensils className={`h-3 w-3 ${isSelected ? "text-sky-400" : "text-slate-500"}`} />
+              <Utensils className={`h-3 w-3 ${isSelected ? "opacity-90" : "opacity-40"}`} />
               <span>{menu.name}</span>
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded ${
-                  isSelected ? "bg-slate-700 text-slate-300" : "bg-slate-800 text-slate-500"
+                className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                  isSelected
+                    ? "bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
                 }`}
               >
-                {menu.recipeItems.length} bahan
+                {menu.recipeItems.length}
               </span>
             </button>
           );
@@ -53,31 +55,31 @@ export function MenuSelector({
 
       {/* Active Menu Detail Card Strip */}
       {selectedMenu && (
-        <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200/90 dark:border-zinc-800/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.03)] dark:shadow-none transition-colors">
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
-              <h2 className="text-sm font-semibold text-white tracking-tight">
+              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
                 {selectedMenu.name}
               </h2>
-              <Badge variant="secondary" className="text-[10px]">
+              <Badge variant="secondary">
                 {selectedMenu.category}
               </Badge>
             </div>
             {selectedMenu.description && (
-              <p className="text-xs text-slate-400 max-w-2xl line-clamp-1">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-2xl line-clamp-1">
                 {selectedMenu.description}
               </p>
             )}
           </div>
 
-          <div className="flex items-center space-x-2 self-end sm:self-auto">
+          <div className="flex items-center space-x-2 self-end sm:self-auto shrink-0">
             <Button
               variant="outline"
               size="sm"
               onClick={() => onEditMenu(selectedMenu)}
-              className="h-7 text-xs px-2.5 text-slate-300 hover:text-white"
+              className="h-7.5 text-xs px-2.5"
             >
-              <Edit2 className="h-3 w-3 mr-1 text-slate-400" />
+              <Edit2 className="h-3 w-3 mr-1 text-zinc-500 dark:text-zinc-400" />
               Ubah Parameter
             </Button>
             {menus.length > 1 && (
@@ -89,7 +91,8 @@ export function MenuSelector({
                     onDeleteMenu(selectedMenu.id);
                   }
                 }}
-                className="h-7 text-xs px-2 text-rose-400 hover:bg-rose-500/20"
+                className="h-7.5 text-xs px-2"
+                title="Hapus menu"
               >
                 <Trash2 className="h-3 w-3" />
               </Button>

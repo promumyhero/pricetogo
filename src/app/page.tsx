@@ -128,7 +128,7 @@ export default function Home() {
     setIngredients((prev) => prev.filter((i) => i.id !== id));
   };
 
-  // Reset Data to Factory Defaults
+  // Reset Data to Defaults
   const handleResetData = () => {
     if (confirm("Reset seluruh data bahan baku dan menu ke template standar restoran?")) {
       setIngredients(INITIAL_INGREDIENTS);
@@ -177,7 +177,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans selection:bg-sky-500/30 selection:text-white">
+    <div className="min-h-screen bg-zinc-100/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans transition-colors">
       {/* Top Navigation */}
       <Header
         activeTab={activeTab}
@@ -233,15 +233,15 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-16 bg-slate-900/40 border border-slate-800 rounded-xl">
-                <p className="text-sm text-slate-400">Belum ada menu yang dibuat.</p>
+              <div className="text-center py-16 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">Belum ada menu yang dibuat.</p>
                 <Button
                   size="sm"
                   onClick={() => {
                     setEditingMenu(null);
                     setIsMenuModalOpen(true);
                   }}
-                  className="mt-3 text-xs bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold"
+                  className="mt-3 text-xs"
                 >
                   Buat Menu Baru Sekarang
                 </Button>
@@ -256,25 +256,25 @@ export default function Home() {
       </main>
 
       {/* Footer & Data Utilities */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/80 py-4 text-xs text-slate-500 mt-12">
+      <footer className="border-t border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 py-4 text-xs text-zinc-500 mt-12 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-slate-400 font-mono text-[11px]">
-              PostgreSQL Schema Ready • Local Fast Cache Active
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="text-zinc-600 dark:text-zinc-400 font-mono text-[11px]">
+              PostgreSQL Ready • Local Fast Cache Active
             </span>
           </div>
 
-          <div className="flex items-center space-x-3 text-[11px]">
+          <div className="flex items-center space-x-4 text-[11px]">
             <button
               onClick={handleExportJSON}
-              className="flex items-center space-x-1 hover:text-slate-300 transition-colors cursor-pointer"
+              className="flex items-center space-x-1 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors cursor-pointer"
             >
               <Download className="h-3 w-3" />
               <span>Backup JSON</span>
             </button>
 
-            <label className="flex items-center space-x-1 hover:text-slate-300 transition-colors cursor-pointer">
+            <label className="flex items-center space-x-1 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors cursor-pointer">
               <Upload className="h-3 w-3" />
               <span>Pulihkan JSON</span>
               <input
@@ -287,7 +287,7 @@ export default function Home() {
 
             <button
               onClick={handleResetData}
-              className="flex items-center space-x-1 hover:text-rose-400 transition-colors cursor-pointer text-slate-500"
+              className="flex items-center space-x-1 text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
             >
               <RotateCcw className="h-3 w-3" />
               <span>Reset Data Contoh</span>

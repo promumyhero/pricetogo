@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-10-13
+
+### Added
+- **Light & Dark Theme Engine**:
+  - Implemented custom client-side `ThemeProvider` with localStorage persistence and system fallback.
+  - Added interactive `ThemeToggle` button in the header toolbar.
+  - Added anti-flash inline script in `layout.tsx` to prevent theme flickering on page load.
+- **Design System Harmonization**:
+  - Refactored entire UI design to a clean, modern neutral/zinc color palette with seamless dark/light mode transitions.
+  - Enhanced numeric tabular styling for precise recipe costing and financial waterfall comparisons.
+  - Refined card borders, badge variants, and table padding for improved scannability and contrast.
+
+### Fixed
+- Fixed TypeScript interface naming typo in `ThemeProvider` (`ThemeContextType`).
+- Resolved React 19 synchronous cascading render warnings in `ThemeProvider` and `ThemeToggle`.
+- Fixed missing `...props` forwarding in `CardDescription` component.
+
 ## [1.0.0] - 2026-10-12
 
 ### Added

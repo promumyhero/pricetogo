@@ -23,19 +23,19 @@ export function DineInPricingCard({
     costing.dineInFoodCostPercent > 35 && costing.dineInFoodCostPercent <= 42;
 
   return (
-    <Card className="border-slate-800 bg-slate-900/60 shadow-lg">
-      <CardHeader className="pb-3 border-b border-slate-800">
+    <Card className="border-zinc-200/90 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/60 shadow-[0_1px_3px_rgba(0,0,0,0.03)] dark:shadow-none">
+      <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               <Store className="h-4 w-4" />
             </div>
             <div>
-              <CardTitle className="text-sm font-semibold text-white">
-                Harga Jual Offline (Dine-In / Kasir)
+              <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                Harga Jual Offline (Dine-In)
               </CardTitle>
-              <p className="text-[11px] text-slate-400">
-                Target margin standar restoran & warung makan
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                Target margin standar warung & restoran
               </p>
             </div>
           </div>
@@ -48,7 +48,6 @@ export function DineInPricingCard({
                 ? "warning"
                 : "destructive"
             }
-            className="text-[10px]"
           >
             {isHealthyFoodCost
               ? "Food Cost Sehat (≤35%)"
@@ -63,14 +62,14 @@ export function DineInPricingCard({
         {/* Target Margin Slider */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-300 font-medium">
-              Target Gross Margin Offline:
+            <span className="text-zinc-700 dark:text-zinc-300 font-medium">
+              Target Gross Margin:
             </span>
-            <div className="flex items-center space-x-1 font-mono">
-              <span className="text-sky-400 font-bold text-sm">
+            <div className="flex items-center space-x-1.5 font-mono">
+              <span className="text-zinc-950 dark:text-zinc-50 font-bold text-sm">
                 {menu.targetMarginDineIn}%
               </span>
-              <span className="text-slate-500 text-[11px]">
+              <span className="text-zinc-400 dark:text-zinc-500 text-[11px]">
                 (Food Cost: {(100 - menu.targetMarginDineIn).toFixed(0)}%)
               </span>
             </div>
@@ -85,33 +84,33 @@ export function DineInPricingCard({
               onUpdateMenuParameters({ targetMarginDineIn: val })
             }
           />
-          <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-            <span>30% (Warung Rendah)</span>
-            <span>60-65% (Standar Resto)</span>
-            <span>80%+ (Beverage/Kopi)</span>
+          <div className="flex justify-between text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">
+            <span>30% (Warung)</span>
+            <span>60-65% (Resto)</span>
+            <span>80%+ (Minuman)</span>
           </div>
         </div>
 
         {/* Price Output Comparison Box */}
-        <div className="grid grid-cols-2 gap-3 bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
+        <div className="grid grid-cols-2 gap-3 bg-zinc-50 dark:bg-zinc-950/70 p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800">
           <div>
-            <span className="text-[11px] text-slate-400 block mb-0.5">
-              Rekomendasi Harga Jual:
+            <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block mb-0.5">
+              Rekomendasi Harga:
             </span>
-            <div className="text-lg font-bold font-mono text-white tracking-tight">
+            <div className="text-xl font-bold font-mono text-zinc-950 dark:text-zinc-50 tracking-tight">
               {formatIDR(costing.suggestedDineInPrice)}
             </div>
-            <span className="text-[10px] text-slate-500">
-              Dibulatkan kelipatan Rp 500
+            <span className="text-[10px] text-zinc-400 dark:text-zinc-500 block mt-0.5">
+              Kelipatan Rp 500
             </span>
           </div>
 
           <div>
-            <span className="text-[11px] text-slate-400 block mb-0.5">
-              Harga Pasang Manual (Opsional):
+            <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block mb-0.5">
+              Harga Pasang Manual:
             </span>
             <div className="flex items-center space-x-1">
-              <span className="text-xs text-slate-500">Rp</span>
+              <span className="text-xs text-zinc-400">Rp</span>
               <Input
                 type="number"
                 placeholder={costing.suggestedDineInPrice.toString()}
@@ -120,7 +119,7 @@ export function DineInPricingCard({
                   const val = e.target.value ? parseFloat(e.target.value) : undefined;
                   onUpdateMenuParameters({ manualOfflinePrice: val });
                 }}
-                className="h-8 text-xs bg-slate-900 border-slate-700 font-mono"
+                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono"
                 step="500"
               />
             </div>
@@ -128,31 +127,31 @@ export function DineInPricingCard({
               <button
                 type="button"
                 onClick={() => onUpdateMenuParameters({ manualOfflinePrice: undefined })}
-                className="text-[10px] text-sky-400 hover:underline mt-1"
+                className="text-[10px] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 underline mt-1 cursor-pointer"
               >
-                Gunakan rekomendasi sistem
+                Pakai rekomendasi
               </button>
             )}
           </div>
         </div>
 
         {/* Realization Metrics Strip */}
-        <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800/80 text-center">
-          <div className="p-2 rounded-lg bg-slate-950/50">
-            <span className="text-[10px] text-slate-400 block">Harga Terpilih</span>
-            <span className="font-mono text-xs font-semibold text-slate-200">
+        <div className="grid grid-cols-3 gap-2 pt-1 border-t border-zinc-100 dark:border-zinc-800 text-center">
+          <div className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950/50">
+            <span className="text-[10px] text-zinc-400 block">Harga Pasang</span>
+            <span className="font-mono text-xs font-semibold text-zinc-900 dark:text-zinc-200">
               {formatIDR(costing.finalDineInPrice)}
             </span>
           </div>
-          <div className="p-2 rounded-lg bg-slate-950/50">
-            <span className="text-[10px] text-slate-400 block">Laba Kotor (Rp)</span>
-            <span className="font-mono text-xs font-semibold text-emerald-400">
+          <div className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950/50">
+            <span className="text-[10px] text-zinc-400 block">Laba Kotor</span>
+            <span className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               +{formatIDR(costing.dineInGrossProfit)}
             </span>
           </div>
-          <div className="p-2 rounded-lg bg-slate-950/50">
-            <span className="text-[10px] text-slate-400 block">Gross Margin Riil</span>
-            <span className="font-mono text-xs font-semibold text-sky-400">
+          <div className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950/50">
+            <span className="text-[10px] text-zinc-400 block">Gross Margin</span>
+            <span className="font-mono text-xs font-semibold text-zinc-900 dark:text-zinc-100">
               {costing.dineInGrossMargin.toFixed(1)}%
             </span>
           </div>

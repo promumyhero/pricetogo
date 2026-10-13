@@ -69,12 +69,12 @@ export function IngredientsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-800 text-slate-100 p-6">
-        <DialogHeader className="border-b border-slate-800 pb-3">
-          <DialogTitle className="text-base font-semibold text-white">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 p-6">
+        <DialogHeader className="border-b border-zinc-100 dark:border-zinc-800 pb-3">
+          <DialogTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
             Master Data Bahan Baku & Kemasan
           </DialogTitle>
-          <DialogDescription className="text-xs text-slate-400">
+          <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400">
             Daftar harga beli bahan, satuan metrik, dan persentase susut (yield) yang bisa dipakai di seluruh resep menu.
           </DialogDescription>
         </DialogHeader>
@@ -82,44 +82,44 @@ export function IngredientsModal({
         {/* Form Tambah Bahan Baru */}
         <form
           onSubmit={handleCreate}
-          className="bg-slate-950/70 p-4 rounded-xl border border-slate-800/80 space-y-3"
+          className="bg-zinc-50 dark:bg-zinc-950/70 p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 space-y-3"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-200 flex items-center space-x-1.5">
-              <Plus className="h-3.5 w-3.5 text-sky-400" />
+            <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center space-x-1.5">
+              <Plus className="h-3.5 w-3.5" />
               <span>Input Bahan Baku Baru</span>
             </span>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[11px] text-zinc-400">
               *Otomatis terhubung ke konversi resep
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
             <div className="sm:col-span-5">
-              <label className="text-[10px] text-slate-400 block mb-1">
+              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
                 Nama Bahan Baku
               </label>
               <Input
                 placeholder="Contoh: Daging Ayam Fillet, Beras, dll."
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-8 text-xs bg-slate-900 border-slate-700"
+                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700"
                 required
               />
             </div>
 
             <div className="sm:col-span-3">
-              <label className="text-[10px] text-slate-400 block mb-1">
+              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
                 Kategori
               </label>
               <Select
                 value={category}
                 onValueChange={(val) => setCategory(val as IngredientInput["category"])}
               >
-                <SelectTrigger className="h-8 text-xs bg-slate-900 border-slate-700">
+                <SelectTrigger className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-700">
+                <SelectContent className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
                   <SelectItem value="BAHAN_BAKU">Bahan Baku</SelectItem>
                   <SelectItem value="BUMBU">Bumbu & Saus</SelectItem>
                   <SelectItem value="PACKAGING">Packaging</SelectItem>
@@ -129,7 +129,7 @@ export function IngredientsModal({
             </div>
 
             <div className="sm:col-span-4">
-              <label className="text-[10px] text-slate-400 block mb-1">
+              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
                 Harga Beli (Rp)
               </label>
               <Input
@@ -137,14 +137,14 @@ export function IngredientsModal({
                 placeholder="50000"
                 value={purchasePrice}
                 onChange={(e) => setPurchasePrice(e.target.value)}
-                className="h-8 text-xs bg-slate-900 border-slate-700 font-mono"
+                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono"
                 required
                 min="0"
               />
             </div>
 
             <div className="sm:col-span-3">
-              <label className="text-[10px] text-slate-400 block mb-1">
+              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
                 Jumlah Beli
               </label>
               <Input
@@ -152,7 +152,7 @@ export function IngredientsModal({
                 placeholder="1"
                 value={purchaseQty}
                 onChange={(e) => setPurchaseQty(e.target.value)}
-                className="h-8 text-xs bg-slate-900 border-slate-700 font-mono"
+                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono"
                 min="0.01"
                 step="any"
                 required
@@ -160,14 +160,14 @@ export function IngredientsModal({
             </div>
 
             <div className="sm:col-span-4">
-              <label className="text-[10px] text-slate-400 block mb-1">
+              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
                 Satuan Beli
               </label>
               <Select value={purchaseUnit} onValueChange={setPurchaseUnit}>
-                <SelectTrigger className="h-8 text-xs bg-slate-900 border-slate-700">
+                <SelectTrigger className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-700">
+                <SelectContent className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
                   {Object.entries(SUPPORTED_UNITS).map(([code, def]) => (
                     <SelectItem key={code} value={code}>
                       {def.code} - {def.label}
@@ -178,7 +178,7 @@ export function IngredientsModal({
             </div>
 
             <div className="sm:col-span-3">
-              <label className="text-[10px] text-slate-400 block mb-1" title="Persentase bahan yang bisa dipakai setelah dibersihkan/dikupas/dimasak">
+              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1" title="Persentase bahan yang bisa dipakai setelah dibersihkan/dikupas/dimasak">
                 Yield / Susut (%)
               </label>
               <Input
@@ -186,7 +186,7 @@ export function IngredientsModal({
                 placeholder="100"
                 value={yieldPercent}
                 onChange={(e) => setYieldPercent(e.target.value)}
-                className="h-8 text-xs bg-slate-900 border-slate-700 font-mono"
+                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono"
                 min="10"
                 max="100"
               />
@@ -196,7 +196,7 @@ export function IngredientsModal({
               <Button
                 type="submit"
                 size="sm"
-                className="w-full h-8 text-xs bg-sky-500 hover:bg-sky-400 text-slate-950 font-medium"
+                className="w-full h-8 text-xs"
               >
                 + Simpan
               </Button>
@@ -205,14 +205,14 @@ export function IngredientsModal({
         </form>
 
         {/* Filter & Search Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1">
           <div className="relative w-full sm:w-64">
-            <Search className="h-3.5 w-3.5 absolute left-2.5 top-2.5 text-slate-500" />
+            <Search className="h-3.5 w-3.5 absolute left-2.5 top-2.5 text-zinc-400" />
             <Input
               placeholder="Cari bahan baku..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-8 text-xs pl-8 bg-slate-950 border-slate-800"
+              className="h-8 text-xs pl-8 bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800"
             />
           </div>
 
@@ -224,8 +224,8 @@ export function IngredientsModal({
                 onClick={() => setCategoryFilter(cat)}
                 className={`text-[11px] px-2.5 py-1 rounded-md border transition-colors cursor-pointer ${
                   categoryFilter === cat
-                    ? "bg-slate-800 border-slate-700 text-white font-medium"
-                    : "border-transparent text-slate-400 hover:text-slate-200"
+                    ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 font-medium"
+                    : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
                 }`}
               >
                 {cat === "ALL" ? "Semua" : cat}
@@ -235,41 +235,41 @@ export function IngredientsModal({
         </div>
 
         {/* Ingredients Table */}
-        <div className="overflow-x-auto rounded-lg border border-slate-800/80">
+        <div className="overflow-x-auto rounded-xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-950/40">
           <table className="w-full text-xs text-left">
-            <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+            <thead className="bg-zinc-50 dark:bg-zinc-950 text-zinc-500 dark:text-zinc-400 uppercase text-[10px] tracking-wider border-b border-zinc-200 dark:border-zinc-800">
               <tr>
-                <th className="py-2.5 px-3">Nama Bahan</th>
-                <th className="py-2.5 px-3">Kategori</th>
-                <th className="py-2.5 px-3">Harga Beli</th>
-                <th className="py-2.5 px-3">Satuan Pembelian</th>
-                <th className="py-2.5 px-3">Yield / Susut</th>
+                <th className="py-2.5 px-3.5">Nama Bahan</th>
+                <th className="py-2.5 px-3.5">Kategori</th>
+                <th className="py-2.5 px-3.5">Harga Beli</th>
+                <th className="py-2.5 px-3.5">Satuan Pembelian</th>
+                <th className="py-2.5 px-3.5">Yield / Susut</th>
                 <th className="py-2.5 px-2 text-center w-10">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-sans">
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60 font-sans">
               {filtered.map((ing) => (
-                <tr key={ing.id} className="hover:bg-slate-800/30">
-                  <td className="py-2 px-3 font-medium text-slate-200">
+                <tr key={ing.id} className="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/30">
+                  <td className="py-2 px-3.5 font-medium text-zinc-900 dark:text-zinc-200">
                     {ing.name}
                   </td>
-                  <td className="py-2 px-3">
+                  <td className="py-2 px-3.5">
                     <Badge variant="secondary" className="text-[10px]">
                       {ing.category}
                     </Badge>
                   </td>
-                  <td className="py-2 px-3 font-mono text-slate-200">
+                  <td className="py-2 px-3.5 font-mono text-zinc-800 dark:text-zinc-200">
                     {formatIDR(ing.purchasePrice)}
                   </td>
-                  <td className="py-2 px-3 font-mono text-slate-300">
+                  <td className="py-2 px-3.5 font-mono text-zinc-600 dark:text-zinc-300">
                     {ing.purchaseQty} {ing.purchaseUnit}
                   </td>
-                  <td className="py-2 px-3 font-mono">
+                  <td className="py-2 px-3.5 font-mono">
                     <span
                       className={`text-[10px] px-1.5 py-0.5 rounded ${
                         ing.yieldPercent < 100
-                          ? "bg-amber-500/15 text-amber-300"
-                          : "text-slate-400"
+                          ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40"
+                          : "text-zinc-500"
                       }`}
                     >
                       {ing.yieldPercent}%
@@ -279,7 +279,7 @@ export function IngredientsModal({
                     <button
                       type="button"
                       onClick={() => onDeleteIngredient(ing.id)}
-                      className="text-slate-500 hover:text-rose-400 p-1"
+                      className="text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 p-1 cursor-pointer"
                       title="Hapus bahan"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
