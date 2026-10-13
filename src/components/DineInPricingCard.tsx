@@ -23,9 +23,9 @@ export function DineInPricingCard({
     costing.dineInFoodCostPercent > 35 && costing.dineInFoodCostPercent <= 42;
 
   return (
-    <Card className="border-zinc-200/90 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/60 shadow-[0_1px_3px_rgba(0,0,0,0.03)] dark:shadow-none">
-      <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
-        <div className="flex items-center justify-between">
+    <Card className="border-zinc-200/90 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/60 shadow-xs">
+      <CardHeader className="p-3.5 sm:p-5 pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center space-x-2.5">
             <div className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               <Store className="h-4 w-4" />
@@ -40,25 +40,28 @@ export function DineInPricingCard({
             </div>
           </div>
 
-          <Badge
-            variant={
-              isHealthyFoodCost
-                ? "success"
+          <div>
+            <Badge
+              variant={
+                isHealthyFoodCost
+                  ? "success"
+                  : isModerateFoodCost
+                  ? "warning"
+                  : "destructive"
+              }
+              className="text-[10px]"
+            >
+              {isHealthyFoodCost
+                ? "Food Cost Sehat (≤35%)"
                 : isModerateFoodCost
-                ? "warning"
-                : "destructive"
-            }
-          >
-            {isHealthyFoodCost
-              ? "Food Cost Sehat (≤35%)"
-              : isModerateFoodCost
-              ? "Food Cost Sedang (36-42%)"
-              : "Food Cost Tinggi (>42%)"}
-          </Badge>
+                ? "Food Cost Sedang (36-42%)"
+                : "Food Cost Tinggi (>42%)"}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4 pt-4">
+      <CardContent className="p-3.5 sm:p-5 space-y-3.5 sm:space-y-4 pt-3.5 sm:pt-4">
         {/* Target Margin Slider */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs">
@@ -66,7 +69,7 @@ export function DineInPricingCard({
               Target Gross Margin:
             </span>
             <div className="flex items-center space-x-1.5 font-mono">
-              <span className="text-zinc-950 dark:text-zinc-50 font-bold text-sm">
+              <span className="text-zinc-950 dark:text-zinc-50 font-bold text-sm tabular-nums">
                 {menu.targetMarginDineIn}%
               </span>
               <span className="text-zinc-400 dark:text-zinc-500 text-[11px]">
@@ -92,12 +95,12 @@ export function DineInPricingCard({
         </div>
 
         {/* Price Output Comparison Box */}
-        <div className="grid grid-cols-2 gap-3 bg-zinc-50 dark:bg-zinc-950/70 p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 bg-zinc-50 dark:bg-zinc-950/70 p-3 sm:p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800">
           <div>
             <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block mb-0.5">
               Rekomendasi Harga:
             </span>
-            <div className="text-xl font-bold font-mono text-zinc-950 dark:text-zinc-50 tracking-tight">
+            <div className="text-xl font-bold font-mono text-zinc-950 dark:text-zinc-50 tracking-tight tabular-nums">
               {formatIDR(costing.suggestedDineInPrice)}
             </div>
             <span className="text-[10px] text-zinc-400 dark:text-zinc-500 block mt-0.5">
@@ -113,13 +116,14 @@ export function DineInPricingCard({
               <span className="text-xs text-zinc-400">Rp</span>
               <Input
                 type="number"
+                inputMode="decimal"
                 placeholder={costing.suggestedDineInPrice.toString()}
                 value={menu.manualOfflinePrice || ""}
                 onChange={(e) => {
                   const val = e.target.value ? parseFloat(e.target.value) : undefined;
                   onUpdateMenuParameters({ manualOfflinePrice: val });
                 }}
-                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono"
+                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono tabular-nums"
                 step="500"
               />
             </div>
@@ -136,22 +140,22 @@ export function DineInPricingCard({
         </div>
 
         {/* Realization Metrics Strip */}
-        <div className="grid grid-cols-3 gap-2 pt-1 border-t border-zinc-100 dark:border-zinc-800 text-center">
-          <div className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950/50">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-1 border-t border-zinc-100 dark:border-zinc-800 text-center">
+          <div className="p-1.5 sm:p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950/50">
             <span className="text-[10px] text-zinc-400 block">Harga Pasang</span>
-            <span className="font-mono text-xs font-semibold text-zinc-900 dark:text-zinc-200">
+            <span className="font-mono text-xs font-semibold text-zinc-900 dark:text-zinc-200 tabular-nums">
               {formatIDR(costing.finalDineInPrice)}
             </span>
           </div>
-          <div className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950/50">
+          <div className="p-1.5 sm:p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950/50">
             <span className="text-[10px] text-zinc-400 block">Laba Kotor</span>
-            <span className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+            <span className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
               +{formatIDR(costing.dineInGrossProfit)}
             </span>
           </div>
-          <div className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950/50">
+          <div className="p-1.5 sm:p-2 rounded-lg bg-zinc-50 dark:bg-zinc-950/50">
             <span className="text-[10px] text-zinc-400 block">Gross Margin</span>
-            <span className="font-mono text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+            <span className="font-mono text-xs font-semibold text-zinc-900 dark:text-zinc-100 tabular-nums">
               {costing.dineInGrossMargin.toFixed(1)}%
             </span>
           </div>

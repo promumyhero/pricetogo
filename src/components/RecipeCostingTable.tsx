@@ -13,7 +13,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
-import { Plus, Trash2, Package, Flame } from "lucide-react";
+import { Plus, Trash2, Package, Flame, ArrowRight } from "lucide-react";
 
 interface RecipeCostingTableProps {
   menu: MenuItemInput;
@@ -73,18 +73,18 @@ export function RecipeCostingTable({
   return (
     <Card className="border-zinc-200/90 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/60 shadow-xs">
       {/* Table Header Section */}
-      <CardHeader className="flex flex-row items-center justify-between p-5 border-b border-zinc-100 dark:border-zinc-800/70">
-        <div className="space-y-1">
+      <CardHeader className="flex flex-row items-center justify-between p-3.5 sm:p-5 border-b border-zinc-100 dark:border-zinc-800/70 gap-2">
+        <div className="space-y-0.5 sm:space-y-1">
           <div className="flex items-center space-x-2">
             <CardTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-              Komposisi Resep & Bahan Baku (BOM)
+              Komposisi Resep (BOM)
             </CardTitle>
             <Badge variant="outline" className="font-mono text-[10px] px-1.5 py-0 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400">
               {menu.recipeItems.length} Bahan
             </Badge>
           </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Kalkulasi akurat biaya bahan per porsi dengan konversi metrik dan faktor susut
+          <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1 sm:line-clamp-none">
+            Kalkulasi biaya bahan per porsi dengan konversi metrik & faktor susut
           </p>
         </div>
         {onOpenIngredientsModal && (
@@ -92,21 +92,22 @@ export function RecipeCostingTable({
             variant="outline"
             size="sm"
             onClick={onOpenIngredientsModal}
-            className="h-8 text-xs text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="h-7.5 sm:h-8 text-xs text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 shrink-0 px-2.5 sm:px-3"
           >
             Master Bahan
           </Button>
         )}
       </CardHeader>
 
-      <CardContent className="p-5 space-y-5">
-        {/* Quick Add Form Bar */}
-        <div className="bg-zinc-50/90 dark:bg-zinc-950/70 p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80">
-          <div className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2.5">
+      <CardContent className="p-3.5 sm:p-5 space-y-4 sm:space-y-5">
+        {/* Quick Add Form Bar (Optimized for Mobile 2-col & Desktop 12-col) */}
+        <div className="bg-zinc-50/90 dark:bg-zinc-950/70 p-3 sm:p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800/80">
+          <div className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2 sm:mb-2.5">
             Tambah Komponen Bahan
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
-            <div className="sm:col-span-5">
+          <div className="grid grid-cols-12 gap-2 sm:gap-2.5 items-end">
+            {/* Bahan Dropdown */}
+            <div className="col-span-12 sm:col-span-5">
               <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block mb-1">
                 Pilih Bahan Baku
               </label>
@@ -135,12 +136,14 @@ export function RecipeCostingTable({
               </Select>
             </div>
 
-            <div className="sm:col-span-3">
+            {/* Takaran Input (Side-by-side with Satuan on Mobile) */}
+            <div className="col-span-6 sm:col-span-3">
               <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block mb-1">
                 Takaran Porsi
               </label>
               <Input
                 type="number"
+                inputMode="decimal"
                 placeholder="100"
                 value={usageQty}
                 onChange={(e) => setUsageQty(e.target.value)}
@@ -150,7 +153,8 @@ export function RecipeCostingTable({
               />
             </div>
 
-            <div className="sm:col-span-2">
+            {/* Satuan Select (Side-by-side with Takaran on Mobile) */}
+            <div className="col-span-6 sm:col-span-2">
               <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block mb-1">
                 Satuan
               </label>
@@ -168,7 +172,8 @@ export function RecipeCostingTable({
               </Select>
             </div>
 
-            <div className="sm:col-span-2">
+            {/* Tambah Button */}
+            <div className="col-span-12 sm:col-span-2">
               <Button
                 type="button"
                 size="sm"
@@ -183,24 +188,32 @@ export function RecipeCostingTable({
           </div>
         </div>
 
+        {/* Mobile Horizontal Scroll Indicator Helper */}
+        <div className="sm:hidden flex items-center justify-between text-[11px] text-zinc-400 px-0.5">
+          <span>Rincian Komponen Resep</span>
+          <span className="flex items-center text-[10px] text-zinc-500 font-mono">
+            Geser tabel <ArrowRight className="h-2.5 w-2.5 ml-0.5" />
+          </span>
+        </div>
+
         {/* Minimalist, Professional Recipe Table */}
-        <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 shadow-xs">
+        <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 shadow-xs touch-pan-x -mx-1 sm:mx-0">
           <table className="w-full text-left text-xs border-collapse">
             <thead className="bg-zinc-50 dark:bg-zinc-900/80 text-zinc-500 dark:text-zinc-400 uppercase text-[11px] font-semibold tracking-wider border-b border-zinc-200 dark:border-zinc-800">
               <tr>
-                <th className="py-3 pl-4 pr-3 min-w-44">Bahan Baku</th>
-                <th className="py-3 px-3.5 min-w-30">Harga Beli</th>
-                <th className="py-3 px-3 text-center min-w-22">Yield</th>
-                <th className="py-3 px-3.5 text-center min-w-32">Takaran / Porsi</th>
-                <th className="py-3 px-3.5 text-right min-w-26">Subtotal HPP</th>
-                <th className="py-3 px-3.5 text-right min-w-24">Porsi %</th>
-                <th className="py-3 pr-4 pl-2 text-center w-12">Aksi</th>
+                <th className="py-2.5 sm:py-3 pl-3 sm:pl-4 pr-3 min-w-40 sm:min-w-44">Bahan Baku</th>
+                <th className="py-2.5 sm:py-3 px-2.5 sm:px-3.5 min-w-28 sm:min-w-30">Harga Beli</th>
+                <th className="py-2.5 sm:py-3 px-2 sm:px-3 text-center min-w-20 sm:min-w-22">Yield</th>
+                <th className="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-center min-w-28 sm:min-w-32">Takaran / Porsi</th>
+                <th className="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-right min-w-24 sm:min-w-26">Subtotal HPP</th>
+                <th className="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-right min-w-20 sm:min-w-24">Porsi %</th>
+                <th className="py-2.5 sm:py-3 pr-3 sm:pr-4 pl-1 sm:pl-2 text-center w-10 sm:w-12">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60 font-sans">
               {menu.recipeItems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-zinc-500">
+                  <td colSpan={7} className="py-10 sm:py-12 text-center text-zinc-500 px-4">
                     <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Belum ada bahan baku di resep ini.</p>
                     <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1">
                       Gunakan form di atas untuk menambahkan bahan dan takaran per porsi.
@@ -228,7 +241,7 @@ export function RecipeCostingTable({
                       className="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/30 transition-colors"
                     >
                       {/* 1. Component Name */}
-                      <td className="py-3 pl-4 pr-3 align-middle">
+                      <td className="py-2.5 sm:py-3 pl-3 sm:pl-4 pr-3 align-middle">
                         <div className="font-medium text-xs text-zinc-900 dark:text-zinc-100 leading-snug">
                           {ing.name}
                         </div>
@@ -238,7 +251,7 @@ export function RecipeCostingTable({
                       </td>
 
                       {/* 2. Purchase Price */}
-                      <td className="py-3 px-3.5 align-middle whitespace-nowrap">
+                      <td className="py-2.5 sm:py-3 px-2.5 sm:px-3.5 align-middle whitespace-nowrap">
                         <div className="font-mono text-xs text-zinc-800 dark:text-zinc-200 tabular-nums">
                           {formatIDR(ing.purchasePrice)}
                         </div>
@@ -248,7 +261,7 @@ export function RecipeCostingTable({
                       </td>
 
                       {/* 3. Yield / Shrinkage */}
-                      <td className="py-3 px-3 align-middle text-center whitespace-nowrap">
+                      <td className="py-2.5 sm:py-3 px-2 sm:px-3 align-middle text-center whitespace-nowrap">
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono tabular-nums bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200">
                           {ing.yieldPercent}%
                         </span>
@@ -260,10 +273,11 @@ export function RecipeCostingTable({
                       </td>
 
                       {/* 4. Recipe Usage Input */}
-                      <td className="py-3 px-3.5 align-middle text-center whitespace-nowrap">
-                        <div className="inline-flex items-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-0.5 shadow-2xs focus-within:ring-1 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-400">
+                      <td className="py-2.5 sm:py-3 px-2.5 sm:px-3.5 align-middle text-center whitespace-nowrap">
+                        <div className="inline-flex items-center rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-1.5 sm:px-2 py-0.5 shadow-2xs focus-within:ring-1 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-400">
                           <input
                             type="number"
+                            inputMode="decimal"
                             value={item.usageQty}
                             onChange={(e) =>
                               handleUpdateItemQty(
@@ -271,7 +285,7 @@ export function RecipeCostingTable({
                                 parseFloat(e.target.value) || 0
                               )
                             }
-                            className="w-16 text-right text-xs font-mono tabular-nums bg-transparent text-zinc-900 dark:text-zinc-100 outline-none pr-1.5"
+                            className="w-14 sm:w-16 text-right text-xs font-mono tabular-nums bg-transparent text-zinc-900 dark:text-zinc-100 outline-none pr-1"
                             min="0.01"
                             step="any"
                           />
@@ -282,7 +296,7 @@ export function RecipeCostingTable({
                       </td>
 
                       {/* 5. Calculated Cost */}
-                      <td className="py-3 px-3.5 text-right align-middle whitespace-nowrap font-mono font-medium text-xs text-zinc-900 dark:text-zinc-100 tabular-nums">
+                      <td className="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-right align-middle whitespace-nowrap font-mono font-medium text-xs text-zinc-900 dark:text-zinc-100 tabular-nums">
                         {error ? (
                           <span className="text-rose-600 dark:text-rose-400 text-[10px]">{error}</span>
                         ) : (
@@ -291,12 +305,12 @@ export function RecipeCostingTable({
                       </td>
 
                       {/* 6. Contribution % */}
-                      <td className="py-3 px-3.5 text-right align-middle whitespace-nowrap">
-                        <div className="flex items-center justify-end space-x-2">
+                      <td className="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-right align-middle whitespace-nowrap">
+                        <div className="flex items-center justify-end space-x-1.5 sm:space-x-2">
                           <span className="font-mono text-xs text-zinc-600 dark:text-zinc-400 tabular-nums">
                             {costShare.toFixed(1)}%
                           </span>
-                          <div className="w-10 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden shrink-0">
+                          <div className="w-8 sm:w-10 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden shrink-0 hidden sm:block">
                             <div
                               className="h-full bg-zinc-800 dark:bg-zinc-200 rounded-full"
                               style={{ width: `${Math.min(100, costShare)}%` }}
@@ -306,7 +320,7 @@ export function RecipeCostingTable({
                       </td>
 
                       {/* 7. Action Button */}
-                      <td className="py-3 pr-4 pl-2 text-center align-middle">
+                      <td className="py-2.5 sm:py-3 pr-3 sm:pr-4 pl-1 sm:pl-2 text-center align-middle">
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(item.id)}
@@ -325,13 +339,13 @@ export function RecipeCostingTable({
             {menu.recipeItems.length > 0 && (
               <tfoot className="bg-zinc-50/90 dark:bg-zinc-900/90 border-t border-zinc-200 dark:border-zinc-800">
                 <tr>
-                  <td colSpan={4} className="py-3 pl-4 pr-3 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  <td colSpan={4} className="py-2.5 sm:py-3 pl-3 sm:pl-4 pr-3 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                     Total Biaya Bahan Baku (Raw Food Cost)
                   </td>
-                  <td className="py-3 px-3.5 text-right font-mono font-bold text-xs text-zinc-950 dark:text-zinc-50 tabular-nums">
+                  <td className="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-right font-mono font-bold text-xs text-zinc-950 dark:text-zinc-50 tabular-nums">
                     {formatIDR(costing.rawFoodCost)}
                   </td>
-                  <td className="py-3 px-3.5 text-right font-mono text-xs text-zinc-500 tabular-nums">
+                  <td className="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-right font-mono text-xs text-zinc-500 tabular-nums">
                     100.0%
                   </td>
                   <td />
@@ -342,22 +356,22 @@ export function RecipeCostingTable({
         </div>
 
         {/* Costing Waterfall Cards (Offline vs Online) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 pt-1">
           {/* Offline / Dine-in Cost Allocation */}
-          <div className="bg-zinc-50/80 dark:bg-zinc-950/60 border border-zinc-200/90 dark:border-zinc-800/90 rounded-xl p-4.5 flex flex-col justify-between space-y-4">
+          <div className="bg-zinc-50/80 dark:bg-zinc-950/60 border border-zinc-200/90 dark:border-zinc-800/90 rounded-xl p-3.5 sm:p-4.5 flex flex-col justify-between space-y-3.5">
             <div>
               <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800/70 pb-2.5 mb-3">
                 <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                   Alokasi HPP Dine-In (Offline)
                 </span>
                 <Badge variant="secondary" className="text-[10px]">
-                  Makan di Tempat / Takeaway
+                  Makan di Tempat
                 </Badge>
               </div>
 
               <div className="space-y-2.5 text-xs">
                 <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
-                  <span>Total Bahan Baku (Raw Food):</span>
+                  <span>Total Bahan Baku:</span>
                   <span className="font-mono text-zinc-900 dark:text-zinc-100 font-medium tabular-nums">
                     {formatIDR(costing.rawFoodCost)}
                   </span>
@@ -371,6 +385,7 @@ export function RecipeCostingTable({
                   <div className="flex items-center space-x-1">
                     <input
                       type="number"
+                      inputMode="decimal"
                       value={menu.overheadPercent}
                       onChange={(e) =>
                         onUpdateMenuParameters({
@@ -389,11 +404,12 @@ export function RecipeCostingTable({
                 </div>
 
                 <div className="flex items-center justify-between text-zinc-600 dark:text-zinc-400">
-                  <span>Kemasan Makan di Tempat / Alas:</span>
+                  <span>Kemasan Dine-In / Piring:</span>
                   <div className="flex items-center space-x-1">
                     <span className="text-zinc-400 text-xs">Rp</span>
                     <input
                       type="number"
+                      inputMode="decimal"
                       value={menu.packagingOfflineCost}
                       onChange={(e) =>
                         onUpdateMenuParameters({
@@ -418,7 +434,7 @@ export function RecipeCostingTable({
           </div>
 
           {/* Online / Delivery Cost Allocation */}
-          <div className="bg-zinc-50/80 dark:bg-zinc-950/60 border border-zinc-200/90 dark:border-zinc-800/90 rounded-xl p-4.5 flex flex-col justify-between space-y-4">
+          <div className="bg-zinc-50/80 dark:bg-zinc-950/60 border border-zinc-200/90 dark:border-zinc-800/90 rounded-xl p-3.5 sm:p-4.5 flex flex-col justify-between space-y-3.5">
             <div>
               <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800/70 pb-2.5 mb-3">
                 <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center space-x-1.5">
@@ -426,13 +442,13 @@ export function RecipeCostingTable({
                   <span>Alokasi HPP Online Delivery</span>
                 </span>
                 <Badge variant="outline" className="text-[10px]">
-                  GoFood / GrabFood
+                  Ojol Delivery
                 </Badge>
               </div>
 
               <div className="space-y-2.5 text-xs">
                 <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
-                  <span>Bahan + Gas & Overhead:</span>
+                  <span>Bahan + Buffer Gas:</span>
                   <span className="font-mono text-zinc-900 dark:text-zinc-100 font-medium tabular-nums">
                     {formatIDR(costing.rawFoodCost + costing.overheadBufferCost)}
                   </span>
@@ -447,6 +463,7 @@ export function RecipeCostingTable({
                     <span className="text-zinc-400 text-xs">Rp</span>
                     <input
                       type="number"
+                      inputMode="decimal"
                       value={menu.packagingOnlineCost}
                       onChange={(e) =>
                         onUpdateMenuParameters({

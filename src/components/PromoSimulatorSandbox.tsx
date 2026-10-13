@@ -205,14 +205,14 @@ export function PromoSimulatorSandbox() {
 
         {/* Right Column: Comparison & Results */}
         <div className="lg:col-span-7 space-y-4">
-          <Card className="border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 shadow-[0_1px_3px_rgba(0,0,0,0.03)] dark:shadow-none">
-            <CardContent className="p-6 space-y-5">
-              <div className="flex items-center justify-between">
+          <Card className="border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 shadow-xs">
+            <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                     Hasil Kalkulasi Reverse Pricing
                   </span>
-                  <h3 className="text-3xl sm:text-4xl font-bold font-mono tracking-tight text-zinc-950 dark:text-zinc-50 mt-1">
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold font-mono tracking-tight text-zinc-950 dark:text-zinc-50 mt-1 tabular-nums">
                     {formatIDR(recommendedListingPrice)}
                   </h3>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
@@ -220,12 +220,12 @@ export function PromoSimulatorSandbox() {
                   </p>
                 </div>
 
-                <div className="text-right">
+                <div className="text-left sm:text-right self-start sm:self-auto shrink-0">
                   <Badge variant="success">
                     <ShieldCheck className="h-3 w-3 mr-1" />
                     Target Terjamin
                   </Badge>
-                  <div className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold mt-2">
+                  <div className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold mt-1.5 sm:mt-2 tabular-nums">
                     Laba Bersih: +{formatIDR(netProfit)}
                   </div>
                   <div className="text-[10px] text-zinc-400">

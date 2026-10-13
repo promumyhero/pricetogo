@@ -69,7 +69,7 @@ export function IngredientsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 p-6">
+      <DialogContent className="w-[calc(100%-1.5rem)] sm:w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 p-4 sm:p-6 rounded-2xl sm:rounded-xl">
         <DialogHeader className="border-b border-zinc-100 dark:border-zinc-800 pb-3">
           <DialogTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
             Master Data Bahan Baku & Kemasan
@@ -79,24 +79,24 @@ export function IngredientsModal({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Form Tambah Bahan Baru */}
+        {/* Form Tambah Bahan Baru (Responsive paired grid) */}
         <form
           onSubmit={handleCreate}
-          className="bg-zinc-50 dark:bg-zinc-950/70 p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 space-y-3"
+          className="bg-zinc-50 dark:bg-zinc-950/70 p-3 sm:p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 space-y-3"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center space-x-1.5">
               <Plus className="h-3.5 w-3.5" />
               <span>Input Bahan Baku Baru</span>
             </span>
-            <span className="text-[11px] text-zinc-400">
+            <span className="text-[10px] text-zinc-400 hidden sm:inline">
               *Otomatis terhubung ke konversi resep
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
-            <div className="sm:col-span-5">
-              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
+          <div className="grid grid-cols-12 gap-2 sm:gap-2.5">
+            <div className="col-span-12 sm:col-span-5">
+              <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block mb-1">
                 Nama Bahan Baku
               </label>
               <Input
@@ -108,8 +108,8 @@ export function IngredientsModal({
               />
             </div>
 
-            <div className="sm:col-span-3">
-              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
+            <div className="col-span-12 sm:col-span-3">
+              <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block mb-1">
                 Kategori
               </label>
               <Select
@@ -128,39 +128,41 @@ export function IngredientsModal({
               </Select>
             </div>
 
-            <div className="sm:col-span-4">
-              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
+            <div className="col-span-12 sm:col-span-4">
+              <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block mb-1">
                 Harga Beli (Rp)
               </label>
               <Input
                 type="number"
+                inputMode="decimal"
                 placeholder="50000"
                 value={purchasePrice}
                 onChange={(e) => setPurchasePrice(e.target.value)}
-                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono"
+                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono tabular-nums"
                 required
                 min="0"
               />
             </div>
 
-            <div className="sm:col-span-3">
-              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
+            <div className="col-span-6 sm:col-span-3">
+              <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block mb-1">
                 Jumlah Beli
               </label>
               <Input
                 type="number"
+                inputMode="decimal"
                 placeholder="1"
                 value={purchaseQty}
                 onChange={(e) => setPurchaseQty(e.target.value)}
-                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono"
+                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono tabular-nums"
                 min="0.01"
                 step="any"
                 required
               />
             </div>
 
-            <div className="sm:col-span-4">
-              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1">
+            <div className="col-span-6 sm:col-span-4">
+              <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block mb-1">
                 Satuan Beli
               </label>
               <Select value={purchaseUnit} onValueChange={setPurchaseUnit}>
@@ -177,22 +179,23 @@ export function IngredientsModal({
               </Select>
             </div>
 
-            <div className="sm:col-span-3">
-              <label className="text-[10px] text-zinc-500 dark:text-zinc-400 block mb-1" title="Persentase bahan yang bisa dipakai setelah dibersihkan/dikupas/dimasak">
+            <div className="col-span-6 sm:col-span-3">
+              <label className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 block mb-1" title="Persentase bahan yang bisa dipakai setelah dibersihkan/dikupas/dimasak">
                 Yield / Susut (%)
               </label>
               <Input
                 type="number"
+                inputMode="decimal"
                 placeholder="100"
                 value={yieldPercent}
                 onChange={(e) => setYieldPercent(e.target.value)}
-                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono"
+                className="h-8 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 font-mono tabular-nums"
                 min="10"
                 max="100"
               />
             </div>
 
-            <div className="sm:col-span-2 flex items-end">
+            <div className="col-span-6 sm:col-span-2 flex items-end">
               <Button
                 type="submit"
                 size="sm"

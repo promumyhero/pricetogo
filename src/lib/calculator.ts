@@ -117,6 +117,16 @@ export const DEFAULT_PLATFORMS: PlatformConfig[] = [
     promoPlatformSharePercent: 0,
     programName: "Reguler (Komisi Standar 20%)",
   },
+  {
+    id: "shopeefood_super_diskon",
+    name: "ShopeeFood (Super Diskon)",
+    badgeColor: "#EE4D2D",
+    commissionPercent: 20,
+    fixedFee: 0,
+    promoMerchantSharePercent: 15,
+    promoPlatformSharePercent: 10,
+    programName: "Super Diskon (Diskon 25%, Beban Merchant 15%)",
+  },
 ];
 
 /**

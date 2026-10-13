@@ -79,7 +79,7 @@ export function MenuModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 p-6">
+      <DialogContent className="w-[calc(100%-1.5rem)] sm:w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 p-4 sm:p-6 rounded-2xl sm:rounded-xl">
         <DialogHeader className="border-b border-zinc-100 dark:border-zinc-800 pb-3">
           <DialogTitle className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
             {initialMenu ? "Ubah Data Menu" : "Tambah Menu Baru"}

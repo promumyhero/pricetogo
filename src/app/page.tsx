@@ -6,8 +6,11 @@ import {
   MenuItemInput,
   RecipeItemInput,
   calculateMenuCosting,
+  DEFAULT_PLATFORMS,
+  calculateOnlinePricing,
 } from "@/lib/calculator";
 import { INITIAL_INGREDIENTS, INITIAL_MENUS } from "@/lib/storage";
+import { formatIDR } from "@/lib/utils";
 import { Header } from "@/components/Header";
 import { MenuSelector } from "@/components/MenuSelector";
 import { RecipeCostingTable } from "@/components/RecipeCostingTable";
@@ -18,7 +21,15 @@ import { MenuModal } from "@/components/MenuModal";
 import { PromoSimulatorSandbox } from "@/components/PromoSimulatorSandbox";
 import { FormulaGuideView } from "@/components/FormulaGuideView";
 import { Button } from "@/components/ui/button";
-import { Download, Upload, RotateCcw } from "lucide-react";
+import {
+  Download,
+  Upload,
+  RotateCcw,
+  Layers,
+  ChefHat,
+  BadgePercent,
+  ArrowRight,
+} from "lucide-react";
 
 export default function Home() {
   // State
@@ -26,6 +37,7 @@ export default function Home() {
   const [menus, setMenus] = useState<MenuItemInput[]>(INITIAL_MENUS);
   const [selectedMenuId, setSelectedMenuId] = useState<string>(INITIAL_MENUS[0]?.id || "");
   const [activeTab, setActiveTab] = useState<string>("costing");
+  const [mobileView, setMobileView] = useState<"all" | "recipe" | "pricing">("all");
 
   // Modals
   const [isIngredientsModalOpen, setIsIngredientsModalOpen] = useState(false);
@@ -83,6 +95,12 @@ export default function Home() {
         dineInFoodCostPercent: 0,
         itemBreakdowns: [],
       };
+
+  // Preview quick reverse price for mobile pill
+  const quickOnlinePricing = calculateOnlinePricing(
+    costing,
+    DEFAULT_PLATFORMS[0]
+  );
 
   // Handlers for Menu updates
   const handleUpdateRecipeItems = (newItems: RecipeItemInput[]) => {
@@ -177,7 +195,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-100/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans transition-colors">
+    <div className="min-h-screen bg-zinc-100/60 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans transition-colors pb-16 lg:pb-0">
       {/* Top Navigation */}
       <Header
         activeTab={activeTab}
@@ -190,9 +208,9 @@ export default function Home() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-6">
         {activeTab === "costing" && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Menu Selection Toolbar */}
             <MenuSelector
               menus={menus}
@@ -206,34 +224,80 @@ export default function Home() {
             />
 
             {selectedMenu ? (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                {/* Left Section: Recipe Ingredients BOM & Costing Waterfall */}
-                <div className="lg:col-span-7 space-y-6">
-                  <RecipeCostingTable
-                    menu={selectedMenu}
-                    ingredients={ingredients}
-                    costing={costing}
-                    onUpdateRecipeItems={handleUpdateRecipeItems}
-                    onUpdateMenuParameters={handleUpdateMenuParameters}
-                    onOpenIngredientsModal={() => setIsIngredientsModalOpen(true)}
-                  />
+              <div className="space-y-4">
+                {/* Responsive View Switcher on Mobile & Tablet (< lg) */}
+                <div className="lg:hidden flex items-center p-1 rounded-xl bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setMobileView("all")}
+                    className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                      mobileView === "all"
+                        ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900"
+                    }`}
+                  >
+                    <Layers className="h-3.5 w-3.5" />
+                    <span>Semua</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileView("recipe")}
+                    className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                      mobileView === "recipe"
+                        ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900"
+                    }`}
+                  >
+                    <ChefHat className="h-3.5 w-3.5" />
+                    <span>Resep BOM</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileView("pricing")}
+                    className={`flex-1 flex items-center justify-center space-x-1.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                      mobileView === "pricing"
+                        ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900"
+                    }`}
+                  >
+                    <BadgePercent className="h-3.5 w-3.5" />
+                    <span>Hasil Harga</span>
+                  </button>
                 </div>
 
-                {/* Right Section: Dine-in Pricing Card & Reverse Delivery Card */}
-                <div className="lg:col-span-5 space-y-6">
-                  {/* Offline Pricing Card */}
-                  <DineInPricingCard
-                    menu={selectedMenu}
-                    costing={costing}
-                    onUpdateMenuParameters={handleUpdateMenuParameters}
-                  />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
+                  {/* Left Section: Recipe Ingredients BOM & Costing Waterfall */}
+                  {(mobileView === "all" || mobileView === "recipe") && (
+                    <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+                      <RecipeCostingTable
+                        menu={selectedMenu}
+                        ingredients={ingredients}
+                        costing={costing}
+                        onUpdateRecipeItems={handleUpdateRecipeItems}
+                        onUpdateMenuParameters={handleUpdateMenuParameters}
+                        onOpenIngredientsModal={() => setIsIngredientsModalOpen(true)}
+                      />
+                    </div>
+                  )}
 
-                  {/* Online Delivery Reverse Pricing (GoFood / GrabFood) */}
-                  <OnlineReversePricingCard costing={costing} />
+                  {/* Right Section: Dine-in Pricing Card & Reverse Delivery Card */}
+                  {(mobileView === "all" || mobileView === "pricing") && (
+                    <div className="lg:col-span-5 space-y-4 sm:space-y-6">
+                      {/* Offline Pricing Card */}
+                      <DineInPricingCard
+                        menu={selectedMenu}
+                        costing={costing}
+                        onUpdateMenuParameters={handleUpdateMenuParameters}
+                      />
+
+                      {/* Online Delivery Reverse Pricing (GoFood / GrabFood) */}
+                      <OnlineReversePricingCard costing={costing} />
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
-              <div className="text-center py-16 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs">
+              <div className="text-center py-12 sm:py-16 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs px-4">
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">Belum ada menu yang dibuat.</p>
                 <Button
                   size="sm"
@@ -255,9 +319,44 @@ export default function Home() {
         {activeTab === "formula" && <FormulaGuideView />}
       </main>
 
+      {/* Floating Bottom Quick Price Summary on Mobile (< lg) */}
+      {activeTab === "costing" && selectedMenu && (
+        <div className="lg:hidden fixed bottom-3 left-3 right-3 z-30">
+          <div className="bg-zinc-900/95 dark:bg-zinc-900/95 text-white backdrop-blur-md border border-zinc-800 rounded-xl p-2.5 px-3.5 shadow-xl flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <div className="text-[10px] text-zinc-400 truncate flex items-center space-x-1.5">
+                <span className="font-medium text-zinc-200 truncate">{selectedMenu.name}</span>
+                <span>•</span>
+                <span>HPP: {formatIDR(costing.cogsOnline)}</span>
+              </div>
+              <div className="flex items-center space-x-2 mt-0.5">
+                <span className="font-mono text-sm font-bold text-white tabular-nums">
+                  {formatIDR(quickOnlinePricing.recommendedListingPrice)}
+                </span>
+                <span className="text-[10px] text-emerald-400 font-mono tabular-nums">
+                  (Net: {formatIDR(quickOnlinePricing.netPayoutToMerchant)})
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMobileView("pricing");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="flex items-center space-x-1 bg-white text-zinc-950 px-2.5 py-1.5 rounded-lg text-xs font-semibold shrink-0 cursor-pointer shadow-2xs hover:bg-zinc-100 transition-colors"
+            >
+              <span>Rincian</span>
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Footer & Data Utilities */}
-      <footer className="border-t border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 py-4 text-xs text-zinc-500 mt-12 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <footer className="border-t border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 py-4 text-xs text-zinc-500 mt-8 sm:mt-12 transition-colors">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center space-x-2">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             <span className="text-zinc-600 dark:text-zinc-400 font-mono text-[11px]">
@@ -265,7 +364,7 @@ export default function Home() {
             </span>
           </div>
 
-          <div className="flex items-center space-x-4 text-[11px]">
+          <div className="flex items-center space-x-3 sm:space-x-4 text-[11px]">
             <button
               onClick={handleExportJSON}
               className="flex items-center space-x-1 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors cursor-pointer"
@@ -290,7 +389,7 @@ export default function Home() {
               className="flex items-center space-x-1 text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
             >
               <RotateCcw className="h-3 w-3" />
-              <span>Reset Data Contoh</span>
+              <span>Reset Contoh</span>
             </button>
           </div>
         </div>
